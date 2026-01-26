@@ -8,9 +8,30 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
         .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
         .dark-glass { background: rgba(17, 24, 39, 0.8); backdrop-filter: blur(10px); }
+        /* Animación para el cargador inicial */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f8fafc;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 <script type="importmap">
 {
@@ -26,7 +47,13 @@
 </script>
 </head>
 <body class="bg-slate-50 text-slate-900">
-    <div id="root"></div>
+    <div id="root">
+        <!-- El contenido se reemplaza por React, esto solo se ve durante la carga -->
+        <div class="loader-container">
+            <div class="spinner"></div>
+            <p style="margin-top: 1rem; font-weight: 600; color: #64748b; font-size: 0.875rem;">Iniciando Mueblesdaso ERP...</p>
+        </div>
+    </div>
     <script type="module" src="./index.tsx"></script>
 </body>
 </html>
