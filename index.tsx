@@ -3,14 +3,41 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 
-const rootElement = document.getElementById('root');
-if (!rootElement) {
-  throw new Error("Could not find root element to mount to");
-}
+console.log("🚀 Mueblesdaso: Iniciando secuencia de arranque...");
 
-const root = createRoot(rootElement);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+const mountApp = () => {
+  const rootElement = document.getElementById('root');
+
+  if (!rootElement) {
+    console.error("❌ Mueblesdaso: No se encontró el elemento #root en el DOM.");
+    return;
+  }
+
+  try {
+    console.log("🚀 Mueblesdaso: Elemento root encontrado. Creando instancia de React...");
+    const root = createRoot(rootElement);
+    
+    console.log("🚀 Mueblesdaso: Ejecutando renderizado inicial...");
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+    console.log("✅ Mueblesdaso: Aplicación montada con éxito.");
+  } catch (error) {
+    console.error("❌ Mueblesdaso: Fallo durante el montaje de React:", error);
+    const display = document.getElementById('error-display');
+    if (display) {
+        display.style.display = 'block';
+        const message = error instanceof Error ? error.message : String(error);
+        display.innerHTML = `<strong>Error de Renderizado:</strong><br>${message}`;
+    }
+  }
+};
+
+// Asegurar que el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mountApp);
+} else {
+    mountApp();
+}
