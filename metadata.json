@@ -1,0 +1,8 @@
+{
+  "name": "Mueblesdaso ERP & CRM",
+  "description": "Unified ERP/CRM system for credit-based retail with PWA field apps, WhatsApp automation, and Docker deployment.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
