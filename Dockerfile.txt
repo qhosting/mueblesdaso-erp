@@ -2,6 +2,7 @@
 FROM nginx:stable-alpine
 
 # Copiar todos los archivos del proyecto al directorio de servicio de Nginx
+# Esto incluye index.html, index.tsx, sw.js, manifest.json y componentes
 COPY . /usr/share/nginx/html
 
 # Copiar configuración personalizada de Nginx para soporte de PWA y SPA
