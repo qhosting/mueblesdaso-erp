@@ -1,0 +1,14 @@
+# Dockerfile para Mueblesdaso ERP - Producción
+FROM nginx:stable-alpine
+
+# Copiar todos los archivos del proyecto al directorio de servicio de Nginx
+COPY . /usr/share/nginx/html
+
+# Copiar configuración personalizada de Nginx para soporte de PWA y SPA
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Exponer el puerto 80 para tráfico HTTP (Estándar de Easypanel para Apps Web)
+EXPOSE 80
+
+# Iniciar el servidor Nginx en primer plano
+CMD ["nginx", "-g", "daemon off;"]
