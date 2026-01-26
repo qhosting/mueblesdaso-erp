@@ -1,14 +1,14 @@
 
 import React, { useState } from 'react';
 import { LayoutDashboard, Smartphone, Terminal, Home, LogOut, ShieldAlert, Users, ShoppingBag, Package } from 'lucide-react';
-import Dashboard from './components/Dashboard';
-import FieldApp from './components/FieldApp';
-import ConfigTerminal from './components/ConfigTerminal';
-import LandingPage from './components/LandingPage';
-import CollectionIntelligence from './components/CollectionIntelligence';
-import ClientsModule from './components/ClientsModule';
-import SalesModule from './components/SalesModule';
-import InventoryModule from './components/InventoryModule';
+import Dashboard from './components/Dashboard.tsx';
+import FieldApp from './components/FieldApp.tsx';
+import ConfigTerminal from './components/ConfigTerminal.tsx';
+import LandingPage from './components/LandingPage.tsx';
+import CollectionIntelligence from './components/CollectionIntelligence.tsx';
+import ClientsModule from './components/ClientsModule.tsx';
+import SalesModule from './components/SalesModule.tsx';
+import InventoryModule from './components/InventoryModule.tsx';
 
 type ViewState = 'landing' | 'admin' | 'field' | 'devops' | 'intelligence' | 'clients' | 'sales' | 'inventory';
 

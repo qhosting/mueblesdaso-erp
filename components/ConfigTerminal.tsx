@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Terminal, Database, Send, Layers, Smartphone, CheckCircle2, Circle, ListChecks, Rocket, ShieldCheck } from 'lucide-react';
 import { DOCKER_COMPOSE_MAESTRO, SQL_SCHEMA, DB_CONFIG } from '../constants';
@@ -21,7 +20,8 @@ export const enviarReciboWhatsApp = async (cliente_id: string, monto: number) =>
 
   try {
     const response = await axios.post(\`\${process.env.WAHA_URL}/api/sendText\`, payload);
-    await db.query('INSERT INTO logs_whatsapp (cliente_id, mensaje, status) VALUES (?, ?, ?)', 
+    // Registro en la nueva tabla con prefijo app_
+    await db.query('INSERT INTO app_whatsapp_logs (cliente_id, mensaje, status) VALUES (?, ?, ?)', 
       [cliente_id, payload.text, 'ENVIADO']);
     return response.data;
   } catch (error) {
@@ -54,7 +54,7 @@ export const enviarReciboWhatsApp = async (cliente_id: string, monto: number) =>
           onClick={() => setActiveTab('prod')}
           className="bg-blue-600 text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all"
         >
-          <Rocket size={14} /> Lanzar a Producción
+          < Rocket size={14} /> Lanzar a Producción
         </button>
       </div>
 

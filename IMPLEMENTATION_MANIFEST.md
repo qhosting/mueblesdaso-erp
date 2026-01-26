@@ -1,4 +1,5 @@
 # 📌 Manifiesto de Despliegue - Mueblesdaso ERP
+**Dominio Principal:** `app.mueblesdaso.com`
 
 Copia y pega estas variables en la sección **Environment Variables** de cada servicio en Easypanel.
 
@@ -12,8 +13,8 @@ Copia y pega estas variables en la sección **Environment Variables** de cada se
 
 ---
 
-## 2. Servicio: `app` (Frontend / PWA / API)
-*Nota: El DB_HOST debe ser el nombre exacto que le pusiste al servicio de MariaDB.*
+## 2. Servicio: `app` (Frontend / PWA)
+*Dominio asociado en Easypanel: `app.mueblesdaso.com`*
 
 | Key | Value |
 | :--- | :--- |
@@ -28,18 +29,25 @@ Copia y pega estas variables en la sección **Environment Variables** de cada se
 ---
 
 ## 3. Servicio: `waha` (WhatsApp API)
+*Para uso interno por la App y n8n.*
+
 | Key | Value |
 | :--- | :--- |
 | `WHATSAPP_DEFAULT_SESSION` | `default` |
 | `WAHA_DEBUG` | `false` |
+| `WAHA_ZIP_LOGS` | `true` |
 
 ---
 
 ## 4. Servicio: `n8n` (Automatización)
+*Nota: Si n8n tiene su propio subdominio (ej: n8n.mueblesdaso.com), úsalo en WEBHOOK_URL.*
+
 | Key | Value |
 | :--- | :--- |
 | `N8N_ENCRYPTION_KEY` | `mueblesdaso_n8n_secure_key_123` |
 | `N8N_USER_MANAGEMENT_JWT_SECRET` | `secret_jwt_muebles_8899` |
+| `N8N_HOST` | `app.mueblesdaso.com` |
+| `WEBHOOK_URL` | `https://app.mueblesdaso.com/n8n/` |
 | `DB_TYPE` | `mariadb` |
 | `DB_MARIADB_HOST` | `mariadb` |
 | `DB_MARIADB_PORT` | `3306` |
@@ -49,10 +57,8 @@ Copia y pega estas variables en la sección **Environment Variables** de cada se
 
 ---
 
-## 🚀 Guía de Conexión en Easypanel
-1. **Redes Internas**: Easypanel crea una red interna automáticamente. Por eso usamos `http://waha:3000` y el host `mariadb`. Si cambias los nombres de los servicios en el panel, actualiza las variables correspondientes.
-2. **Puertos**: 
-   - La `App` (Nginx) debe estar en el puerto `80`.
-   - `WAHA` internamente corre en el `3000`.
-   - `n8n` internamente corre en el `5678`.
-3. **PWA**: Una vez desplegada la App, verás el icono de "Instalar" en la barra de direcciones de Chrome.
+## ⚙️ Configuración de Red en Easypanel
+1. **App Principal**: Apunta el dominio `app.mueblesdaso.com` al servicio `app` en el puerto `80`.
+2. **WAHA**: No necesita exposición pública a menos que quieras usar Swagger desde fuera. Internamente es `http://waha:3000`.
+3. **Persistencia**: Asegúrate de que `mariadb` tenga un volumen montado en `/var/lib/mysql` para no perder datos al reiniciar.
+4. **SSL**: Activa "Let's Encrypt" en Easypanel para el dominio `app.mueblesdaso.com` para que la PWA funcione (requiere HTTPS).

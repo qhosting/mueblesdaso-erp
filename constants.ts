@@ -1,4 +1,3 @@
-
 import { Client, Payment, Collector, Product, InventoryItem, User, UserRole } from './types';
 
 export const DB_CONFIG = {
@@ -137,17 +136,18 @@ services:
 volumes:
   db_data:`;
 
-export const SQL_SCHEMA = `-- ESQUEMA MAESTRO MUEBLESDASO ERP
+export const SQL_SCHEMA = `-- ESQUEMA MAESTRO MUEBLESDASO ERP (OPTIMIZADO PARA MARIADB)
+-- TABLAS CON PREFIJO app_ PARA NUEVA FUNCIONALIDAD
 
--- 1. Roles y Permisos
-CREATE TABLE roles (
+-- 1. Roles de Usuario
+CREATE TABLE IF NOT EXISTS app_roles (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(50) UNIQUE NOT NULL,
   descripcion TEXT
 );
 
 -- 2. Usuarios del Sistema
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS app_users (
   id VARCHAR(50) PRIMARY KEY,
   username VARCHAR(100) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
@@ -156,95 +156,55 @@ CREATE TABLE users (
   rol_id INT,
   status ENUM('ACTIVO', 'INACTIVO') DEFAULT 'ACTIVO',
   last_login DATETIME,
-  FOREIGN KEY (rol_id) REFERENCES roles(id)
+  FOREIGN KEY (rol_id) REFERENCES app_roles(id) ON DELETE SET NULL
 );
 
--- 3. Tabla Legacy Integrada
-CREATE TABLE cat_clientes (
-  id_cliente INT AUTO_INCREMENT PRIMARY KEY,
-  contrato_cliente VARCHAR(20) UNIQUE,
-  cod_cliente VARCHAR(20) UNIQUE,
-  nombre_ccliente VARCHAR(255),
-  cod_vendedor VARCHAR(50),
-  codigo_gestor VARCHAR(20),
-  status_cliente VARCHAR(50),
-  periodicidad_cliente ENUM('SEMANAL', 'QUINCENAL', 'MENSUAL'),
-  pagos_cliente DECIMAL(10,2),
-  dia_cobro VARCHAR(20),
-  saldo_actualcli DECIMAL(10,2),
-  semv INT DEFAULT 0,
-  semdv DECIMAL(10,2) DEFAULT 0,
-  tel1_cliente VARCHAR(20),
-  calle_dom VARCHAR(255),
-  exterior_dom VARCHAR(20),
-  colonia_dom VARCHAR(255),
-  municipio_dom VARCHAR(100),
-  lat_dom DECIMAL(10,8),
-  long_dom DECIMAL(11,8),
-  fcontrato DATE,
-  producto_principal VARCHAR(255)
-);
-
--- 4. Transacciones Financieras (Pagos y Ventas)
-CREATE TABLE transacciones (
+-- 3. Transacciones (Relacionada con la tabla legacy cat_clientes)
+-- Nota: cat_clientes debe existir previamente con el campo id_cliente
+CREATE TABLE IF NOT EXISTS app_transactions (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  tipo ENUM('PAGO', 'VENTA', 'CANCELACION') NOT NULL,
-  cliente_id INT,
+  tipo ENUM('PAGO', 'VENTA', 'CANCELACION', 'ABONO') NOT NULL,
+  cliente_id INT NOT NULL,
   monto DECIMAL(10,2) NOT NULL,
   fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
-  gestor_id VARCHAR(50),
-  folio_recibo VARCHAR(50),
-  metodo_pago VARCHAR(50), -- EFECTIVO, TRANSFERENCIA, BANCO
-  FOREIGN KEY (cliente_id) REFERENCES cat_clientes(id_cliente)
+  user_id VARCHAR(50), -- Usuario que registró la transacción
+  folio_referencia VARCHAR(50),
+  metodo_pago ENUM('EFECTIVO', 'TRANSFERENCIA', 'BANCO', 'DEPOSITO') DEFAULT 'EFECTIVO',
+  notas TEXT,
+  FOREIGN KEY (cliente_id) REFERENCES cat_clientes(id_cliente) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES app_users(id) ON DELETE SET NULL
 );
 
--- 5. Catálogo de Productos e Inventario
-CREATE TABLE productos (
-  id VARCHAR(50) PRIMARY KEY,
-  sku VARCHAR(50) UNIQUE,
-  nombre VARCHAR(255),
-  categoria VARCHAR(100),
-  precio_contado DECIMAL(10,2),
-  precio_credito DECIMAL(10,2)
-);
-
-CREATE TABLE inventario (
+-- 4. Inventario
+CREATE TABLE IF NOT EXISTS app_inventory (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  producto_id VARCHAR(50),
-  stock_actual INT DEFAULT 0,
-  stock_minimo INT DEFAULT 5,
-  ubicacion VARCHAR(100),
-  FOREIGN KEY (producto_id) REFERENCES productos(id)
+  sku VARCHAR(50) NOT NULL,
+  nombre VARCHAR(255) NOT NULL,
+  current_stock INT DEFAULT 0,
+  min_stock INT DEFAULT 5,
+  location VARCHAR(100),
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- 6. Bitácora de Gestión (Cobranza en Campo)
-CREATE TABLE bitacora_gestiones (
+-- 5. Logs de WhatsApp (Relacionada con cat_clientes)
+CREATE TABLE IF NOT EXISTS app_whatsapp_logs (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  cliente_id INT,
-  autor_id VARCHAR(50),
+  cliente_id INT NOT NULL,
+  mensaje TEXT NOT NULL,
   fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
-  texto TEXT,
-  tipo_gestion ENUM('VISITA', 'LLAMADA', 'WHATSAPP', 'SISTEMA'),
-  FOREIGN KEY (cliente_id) REFERENCES cat_clientes(id_cliente),
-  FOREIGN KEY (autor_id) REFERENCES users(id)
+  status ENUM('ENVIADO', 'FALLIDO', 'LEIDO') DEFAULT 'ENVIADO',
+  wa_message_id VARCHAR(100),
+  FOREIGN KEY (cliente_id) REFERENCES cat_clientes(id_cliente) ON DELETE CASCADE
 );
 
--- 7. Compromisos de Pago (Para n8n y WAHA)
-CREATE TABLE compromisos_pago (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  cliente_id INT,
-  fecha_promesa DATE NOT NULL,
-  monto_promesa DECIMAL(10,2),
-  status ENUM('PENDIENTE', 'CUMPLIDO', 'INCUMPLIDO') DEFAULT 'PENDIENTE',
-  FOREIGN KEY (cliente_id) REFERENCES cat_clientes(id_cliente)
-);
+-- Inserción ÚNICAMENTE de roles de configuración (No toca datos legacy)
+INSERT IGNORE INTO app_roles (nombre, descripcion) VALUES 
+('SUPER_ADMIN', 'Acceso total al sistema'),
+('DIRECTOR', 'Reportes financieros y estratégicos'),
+('JEFE_CREDITO', 'Gestión de rutas y auditoría'),
+('COBRANZA', 'App de campo para cobros'),
+('VENTAS', 'Registro de nuevos contratos');
 
--- 8. Auditoría WhatsApp (WAHA)
-CREATE TABLE logs_whatsapp (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  cliente_id INT,
-  mensaje TEXT,
-  fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
-  status ENUM('ENVIADO', 'FALLIDO', 'LEIDO'),
-  FOREIGN KEY (cliente_id) REFERENCES cat_clientes(id_cliente)
-);`;
+-- IMPORTANTE: No se incluyen INSERTS para cat_clientes ni pagos legacy
+-- para preservar la integridad de los datos reales ya existentes.
+`;
