@@ -1,44 +1,58 @@
+# 📌 Manifiesto de Despliegue - Mueblesdaso ERP
 
-# 📌 Manifiesto de Implementación - Mueblesdaso ERP & CRM
+Copia y pega estas variables en la sección **Environment Variables** de cada servicio en Easypanel.
 
-## 🟢 ESTADO ACTUAL: LISTO PARA DESPLIEGUE (100%)
-
-## 1. 🏗️ Infraestructura (Producción)
-- [x] **Docker Compose Maestro:** Integrado para MariaDB y WAHA.
-- [x] **Dockerfile (Nginx Stage):** Listo para servir la PWA.
-- [x] **Configuración Nginx (SPA/PWA):** Manejo de rutas y Service Workers.
-- [x] **Esquema MariaDB:** Estructura completa incluyendo auditoría de WhatsApp.
-
-## 2. 🔑 Variables de Entorno (Easypanel)
-
-### Para el Servicio "App" (Frontend/API)
-| Variable | Valor Requerido |
+## 1. Servicio: `mariadb` (Base de Datos)
+| Key | Value |
 | :--- | :--- |
-| `DB_HOST` | El nombre de tu servicio MariaDB en Easypanel |
-| `DB_USER` | `mueblesdaso_cob` |
-| `DB_PASSWORD` | `B4Dl6VlHDo` |
-| `DB_NAME` | `mueblesdaso_cob` |
-| `WAHA_URL` | URL interna de WAHA (ej: `http://waha-service:3000`) |
-
-### Para el Servicio "MariaDB"
-| Variable | Valor Requerido |
-| :--- | :--- |
-| `MYSQL_ROOT_PASSWORD` | Contraseña fuerte de root |
+| `MYSQL_ROOT_PASSWORD` | `mueblesdaso_root_2024` |
 | `MYSQL_DATABASE` | `mueblesdaso_cob` |
 | `MYSQL_USER` | `mueblesdaso_cob` |
 | `MYSQL_PASSWORD` | `B4Dl6VlHDo` |
 
-## 3. 🚀 Pasos para el Despliegue en Easypanel
-1. **Crear Proyecto:** Crea un nuevo proyecto llamado `Mueblesdaso-ERP`.
-2. **Servicio MariaDB:** Añade MariaDB desde la "App Store" de Easypanel. Configura las variables anteriores.
-3. **Servicio WAHA:** Añade un servicio de imagen Docker con `devlikeapro/waha`.
-4. **Servicio App:** Vincula tu repositorio de GitHub. Easypanel detectará automáticamente el `Dockerfile`.
-5. **Red Interna:** Asegúrate de que los nombres de servicio coincidan con las variables `DB_HOST` y `WAHA_URL`.
+---
 
-## 4. 📱 App de Campo (PWA)
-- Una vez desplegado, accede desde Chrome/Safari en el móvil y selecciona **"Agregar a la pantalla de inicio"** para activar la funcionalidad PWA.
-- El `nginx.conf` ya está configurado para que la app funcione sin conexión (Offline-Ready).
+## 2. Servicio: `app` (Frontend / PWA / API)
+*Nota: El DB_HOST debe ser el nombre exacto que le pusiste al servicio de MariaDB.*
 
-## 5. 🛠️ Post-Producción
-- Ejecuta el script SQL de `constants.ts` en la consola de MariaDB del servicio.
-- Escanea el código QR en la interfaz de WAHA para conectar el número de WhatsApp de cobranza.
+| Key | Value |
+| :--- | :--- |
+| `DB_HOST` | `mariadb` |
+| `DB_NAME` | `mueblesdaso_cob` |
+| `DB_USER` | `mueblesdaso_cob` |
+| `DB_PASS` | `B4Dl6VlHDo` |
+| `WAHA_URL` | `http://waha:3000` |
+| `NODE_ENV` | `production` |
+| `API_KEY_SECRET` | `muebles-secret-2024` |
+
+---
+
+## 3. Servicio: `waha` (WhatsApp API)
+| Key | Value |
+| :--- | :--- |
+| `WHATSAPP_DEFAULT_SESSION` | `default` |
+| `WAHA_DEBUG` | `false` |
+
+---
+
+## 4. Servicio: `n8n` (Automatización)
+| Key | Value |
+| :--- | :--- |
+| `N8N_ENCRYPTION_KEY` | `mueblesdaso_n8n_secure_key_123` |
+| `N8N_USER_MANAGEMENT_JWT_SECRET` | `secret_jwt_muebles_8899` |
+| `DB_TYPE` | `mariadb` |
+| `DB_MARIADB_HOST` | `mariadb` |
+| `DB_MARIADB_PORT` | `3306` |
+| `DB_MARIADB_DATABASE` | `mueblesdaso_cob` |
+| `DB_MARIADB_USER` | `mueblesdaso_cob` |
+| `DB_MARIADB_PASSWORD` | `B4Dl6VlHDo` |
+
+---
+
+## 🚀 Guía de Conexión en Easypanel
+1. **Redes Internas**: Easypanel crea una red interna automáticamente. Por eso usamos `http://waha:3000` y el host `mariadb`. Si cambias los nombres de los servicios en el panel, actualiza las variables correspondientes.
+2. **Puertos**: 
+   - La `App` (Nginx) debe estar en el puerto `80`.
+   - `WAHA` internamente corre en el `3000`.
+   - `n8n` internamente corre en el `5678`.
+3. **PWA**: Una vez desplegada la App, verás el icono de "Instalar" en la barra de direcciones de Chrome.
