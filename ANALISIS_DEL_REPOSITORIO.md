@@ -29,7 +29,7 @@ El sistema está diseñado para interactuar con varios servicios backend, incluy
 - **`App.tsx`**: Componente raíz que maneja la navegación principal a través de un estado `view`. Define la barra lateral y el área de contenido principal.
 - **`IMPLEMENTATION_MANIFEST.md`**: Documento crucial que describe la arquitectura completa del sistema, incluyendo variables de entorno para todos los servicios (MariaDB, Backend, Waha, n8n, Frontend).
 - **`types.ts`**: Define las interfaces TypeScript para los modelos de datos (Usuario, Cliente, Cobrador, Pago, Producto, Inventario, Log de WhatsApp, etc.).
-- **`constants.ts`**: Probablemente contiene valores constantes utilizados en la aplicación (no inspeccionado en detalle pero presente).
+- **`constants.ts`**: Contiene la configuración de conexión (referencial) y, críticamente, **datos de prueba (MOCK_CLIENTS, MOCK_USERS, etc.)** que actualmente alimentan la aplicación.
 
 ### Módulos (Componentes)
 Basado en `App.tsx` y la estructura de archivos, el sistema se divide en los siguientes módulos:
@@ -43,20 +43,37 @@ Basado en `App.tsx` y la estructura de archivos, el sistema se divide en los sig
 7.  **Configuración Técnica (`ConfigTerminal`)**: Herramientas para desarrolladores o configuración del sistema.
 8.  **Landing Page (`LandingPage`)**: Página de presentación pública.
 
-## 4. Integraciones y Datos
+## 4. Estado Actual del Proyecto
+
+### Diagnóstico de Producción (Página en Blanco)
+Se identificó que el despliegue en producción fallaba (mostrando una página en blanco) debido a una configuración incorrecta en el `Dockerfile`.
+- **Problema**: El Dockerfile original copiaba el código fuente `.tsx` directamente al servidor Nginx sin transpilarlo a JavaScript. Los navegadores no pueden ejecutar código TypeScript/JSX nativamente.
+- **Solución Aplicada**: Se actualizó el `Dockerfile` para usar una construcción en dos etapas (Multi-stage build):
+    1.  Compilación con Node.js (`npm run build`).
+    2.  Servicio de los archivos estáticos generados (`dist/`) con Nginx.
+
+### Implementación y Funcionalidad
+El frontend está funcional visualmente, pero opera como un **Prototipo de Alta Fidelidad**:
+1.  **Datos Simulados (Mocks)**: Los componentes principales (`Dashboard`, `ClientsModule`, etc.) consumen datos estáticos definidos en `constants.ts` (ej. `MOCK_CLIENTS`). No hay conexión activa con la base de datos o API en el código del frontend.
+2.  **Autenticación Simulada**: El sistema se encuentra en "Modo: Sin Restricción". El login y la gestión de sesiones no están implementados o están bypassados intencionalmente.
+3.  **Lógica de Negocio**: Gran parte de la lógica (cálculo de mora, filtros) se realiza en el cliente sobre los datos mock, en lugar de venir procesada del backend.
+
+## 5. Implementaciones Faltantes
+Para llevar el proyecto a un estado de producción real, falta implementar:
+
+1.  **Servicio de API (Backend integration)**: Reemplazar el uso de `MOCK_DATA` por llamadas reales (`fetch` o `axios`) a los endpoints de la API (definidos teóricamente en el manifiesto).
+2.  **Autenticación Real**: Implementar el flujo de Login (JWT), protección de rutas y manejo de sesiones.
+3.  **Gestión de Estados Global**: Aunque la app es pequeña, al conectar con la API será necesario gestionar estados de carga, errores y caché de datos (ej. usando React Query o Context).
+4.  **Manejo de Errores**: Implementar feedback visual real cuando fallan las peticiones al servidor.
+
+## 6. Integraciones y Datos (Teórico)
 
 El frontend está diseñado para consumir una API externa. Según el manifiesto de implementación:
 - **API Backend**: Se espera que esté en una URL definida por `VITE_API_URL` (ej. `https://api.mueblesdaso.com`).
-- **Autenticación**: Manejo de roles de usuario (SUPER_ADMIN, DIRECTOR, COBRANZA, etc.) y tokens JWT.
 - **Base de Datos**: Los datos reflejan una estructura relacional con tablas como `cat_clientes` y `pagos`.
 
-## 5. Observaciones Adicionales
-- **Seguridad**: Se advierte sobre el manejo de datos reales en producción.
-- **PWA**: La aplicación está configurada para funcionar como una PWA, lo cual es crítico para el módulo de "App de Campo".
-- **Estado del Desarrollo**: El archivo `package.json` indica una versión `0.0.0`, lo que sugiere que el proyecto está en una fase inicial o de desarrollo activo.
-
-## 6. Pasos Siguientes Recomendados
+## 7. Pasos Siguientes Recomendados
 Si se desea continuar con el desarrollo o despliegue:
-1.  Asegurar que el archivo `.env.local` o las variables de entorno del servidor (como `VITE_API_URL`) estén configuradas correctamente.
-2.  Verificar la conexión con el backend y que los endpoints coincidan con los tipos definidos en `types.ts`.
-3.  Probar la construcción de la imagen Docker y el despliegue en el entorno de destino (Easypanel u otro).
+1.  **Desplegar Backend**: Asegurar que el servicio `backend-api` esté corriendo y accesible.
+2.  **Conectar Frontend-Backend**: Crear un servicio de API en el frontend (`src/services/api.ts`) y sustituir los mocks.
+3.  **Probar Docker**: Verificar que la nueva imagen Docker construye y corre correctamente en local antes de subir a Easypanel.

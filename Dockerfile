@@ -1,20 +1,36 @@
 # Dockerfile optimizado para Easypanel - Mueblesdaso ERP
-# Versión: 2.2.0 (ESM Support)
+# Versión: 2.2.1 (Build Support)
 
+# Etapa 1: Construcción
+FROM node:22-alpine as builder
+WORKDIR /app
+
+# Copiar archivos de dependencias
+COPY package.json package-lock.json* ./
+
+# Instalar dependencias
+RUN npm install
+
+# Copiar el resto del código fuente
+COPY . .
+
+# Construir la aplicación para producción
+RUN npm run build
+
+# Etapa 2: Servidor Nginx
 FROM nginx:stable-alpine
 
 # Metadatos para Easypanel
 LABEL org.opencontainers.image.title="Mueblesdaso ERP"
-LABEL org.opencontainers.image.description="ERP/CRM para venta minorista a crédito con soporte PWA y ESM nativo"
-LABEL org.opencontainers.image.version="2.2.0"
+LABEL org.opencontainers.image.description="ERP/CRM para venta minorista a crédito con soporte PWA"
+LABEL org.opencontainers.image.version="2.2.1"
 LABEL org.opencontainers.image.vendor="Mueblesdaso"
 
 # Limpieza y preparación del directorio raíz de Nginx
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copia de los archivos de la aplicación (Estructura no-build)
-# Nota: Los archivos .tsx son servidos directamente y procesados por el navegador/servidor de desarrollo
-COPY . /usr/share/nginx/html
+# Copia de los archivos construidos (dist) desde la etapa de construcción
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Aplicar configuración de Nginx (Crítica para tipos MIME y SPA)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
