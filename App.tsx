@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { LayoutDashboard, Smartphone, Terminal, Home, LogOut, ShieldAlert, Users, ShoppingBag, Package } from 'lucide-react';
+import { LayoutDashboard, Smartphone, Terminal, Home, LogOut, ShieldAlert, Users, ShoppingBag, Package, Loader2 } from 'lucide-react';
 import Dashboard from './components/Dashboard.tsx';
 import FieldApp from './components/FieldApp.tsx';
 import ConfigTerminal from './components/ConfigTerminal.tsx';
@@ -9,14 +8,22 @@ import CollectionIntelligence from './components/CollectionIntelligence.tsx';
 import ClientsModule from './components/ClientsModule.tsx';
 import SalesModule from './components/SalesModule.tsx';
 import InventoryModule from './components/InventoryModule.tsx';
+import Login from './components/Login.tsx';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { ENV } from './src/config/env';
 
 type ViewState = 'landing' | 'admin' | 'field' | 'devops' | 'intelligence' | 'clients' | 'sales' | 'inventory';
 
-const App: React.FC = () => {
-  // Cambiamos el estado inicial a 'admin' para entrar directo al sistema
+const MainLayout: React.FC = () => {
   const [view, setView] = useState<ViewState>('admin');
+  const { user, logout } = useAuth();
 
-  // La LandingPage sigue disponible si se cambia el estado manualmente o por navegación interna
+  // Si no hay usuario autenticado, mostrar Login
+  // Pero permitimos ver la Landing Page sin login
+  if (!user && view !== 'landing') {
+    return <Login />;
+  }
+
   if (view === 'landing') {
     return <LandingPage onLaunch={() => setView('admin')} />;
   }
@@ -32,7 +39,19 @@ const App: React.FC = () => {
           <span className="font-bold text-white text-lg hidden lg:block tracking-tight">Mueblesdaso</span>
         </div>
 
-        <nav className="flex-1 mt-6 px-3 space-y-1 scrollbar-none overflow-y-auto">
+        <div className="px-6 py-4">
+           <div className="bg-slate-800 rounded-xl p-3 flex items-center gap-3 border border-slate-700">
+              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-xs">
+                {user?.nombre.charAt(0)}
+              </div>
+              <div className="hidden lg:block overflow-hidden">
+                <p className="text-white text-xs font-bold truncate">{user?.nombre}</p>
+                <p className="text-slate-400 text-[10px] font-medium truncate">{user?.rol}</p>
+              </div>
+           </div>
+        </div>
+
+        <nav className="flex-1 mt-2 px-3 space-y-1 scrollbar-none overflow-y-auto">
           {[
             { id: 'admin', icon: <LayoutDashboard />, label: 'Panel Ejecutivo' },
             { id: 'clients', icon: <Users />, label: 'Clientes' },
@@ -67,9 +86,12 @@ const App: React.FC = () => {
              <Home className="w-6 h-6 shrink-0" />
              <span className="hidden lg:block font-medium text-sm">Página Pública</span>
            </button>
-           <button className="w-full flex items-center gap-3 p-3 text-slate-400 hover:text-red-400 transition-colors rounded-xl hover:bg-red-950/20">
+           <button
+             onClick={logout}
+             className="w-full flex items-center gap-3 p-3 text-slate-400 hover:text-red-400 transition-colors rounded-xl hover:bg-red-950/20"
+           >
              <LogOut className="w-6 h-6 shrink-0" />
-             <span className="hidden lg:block font-medium text-sm">Salir del Sistema</span>
+             <span className="hidden lg:block font-medium text-sm">Cerrar Sesión</span>
            </button>
         </div>
       </aside>
@@ -87,12 +109,20 @@ const App: React.FC = () => {
         {/* Badge de Estado del Entorno */}
         <div className="fixed bottom-4 right-4 z-50 pointer-events-none">
           <div className="bg-slate-900/90 text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-2xl border border-slate-700 backdrop-blur-sm pointer-events-auto flex items-center gap-2">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            Modo: Sin Restricción (No Login)
+            <span className={`w-2 h-2 rounded-full animate-pulse ${ENV.IS_DEV ? 'bg-yellow-500' : 'bg-green-500'}`}></span>
+            {ENV.IS_DEV ? 'Modo: Desarrollo' : 'Modo: Producción'}
           </div>
         </div>
       </main>
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <MainLayout />
+    </AuthProvider>
   );
 };
 

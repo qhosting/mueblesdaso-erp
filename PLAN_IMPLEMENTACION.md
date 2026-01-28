@@ -2,20 +2,20 @@
 
 Este plan define la estrategia para transformar el prototipo actual en un sistema de producción conectado y funcional.
 
-## Fase 1: Cimientos y Conectividad (Semana 1)
+## Fase 1: Cimientos y Conectividad (✅ Completado)
 **Objetivo**: Establecer la comunicación con el servidor y asegurar el acceso.
 
-1.  **Capa de Servicios HTTP**:
-    *   Instalar `axios` (si no se usa `fetch`).
+1.  **Capa de Servicios HTTP** (✅):
+    *   Instalar `axios`.
     *   Crear `src/services/api.ts` con configuración base (Base URL, Interceptores).
     *   Configurar variables de entorno (`VITE_API_URL`).
-2.  **Autenticación (Auth)**:
+2.  **Autenticación (Auth)** (✅):
     *   Implementar servicio `AuthService.login(user, pass)`.
     *   Crear Contexto de React (`AuthProvider`) para manejar el estado de la sesión.
     *   Implementar persistencia del Token JWT.
     *   Proteger rutas (Redirección automática a Login).
 
-## Fase 2: Datos Maestros (Semana 2)
+## Fase 2: Datos Maestros (Semana 2 - Pendiente)
 **Objetivo**: Poblar el sistema con información real de la base de datos.
 
 1.  **Módulo de Clientes**:
@@ -54,6 +54,5 @@ Este plan define la estrategia para transformar el prototipo actual en un sistem
 
 ## Estrategia de Ejecución Recomendada
 
-Recomendamos **no intentar migrar todo a la vez**.
-1.  Comience por **Fase 1**. Sin autenticación ni conexión base, nada más funcionará.
-2.  Elija **un solo módulo** para la Fase 2 (ej. Clientes) y complete el ciclo (Lectura y Escritura) antes de pasar al siguiente.
+Actualmente se ha completado la **Fase 1**.
+Siguiente paso recomendado: **Comenzar Fase 2 con el Módulo de Clientes**, ya que es la base para Ventas y Cobranza.

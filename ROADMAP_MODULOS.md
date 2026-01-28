@@ -7,9 +7,11 @@ Este documento detalla el nivel de avance actual de cada módulo del sistema fro
 - 🧠 **Lógica Mock**: Funciona con datos simulados (`constants.ts`).
 - 🔌 **API Real**: Conectado y consumiendo datos del Backend.
 - 🚧 **En Progreso**: En desarrollo activo.
+- ✅ **Completado**: Funcional y listo para producción.
 
 | Módulo | Estado Visual | Lógica de Datos | Estado General | Notas Técnicas |
 | :--- | :---: | :---: | :---: | :--- |
+| **Autenticación (Login)** | ✅ | 🔌/🧠 | ✅ Completado | UI lista, servicio Auth integrado. Usa Fallback Mock si falla API. |
 | **Dashboard** (Panel Ejecutivo) | 🎨 | 🧠 | 🚧 Prototipo | Consume `MOCK_CLIENTS` para calcular balances totales. Falta endpoint `/stats`. |
 | **ClientsModule** (Cartera) | 🎨 | 🧠 | 🚧 Prototipo | Tablas y filtrado funcionan en local. Falta CRUD real contra `/clients`. |
 | **SalesModule** (Ventas) | 🎨 | 🧠 | 🚧 Prototipo | Carrito de compras funcional en memoria. No registra ventas en DB. |
@@ -22,4 +24,4 @@ Este documento detalla el nivel de avance actual de cada módulo del sistema fro
 ---
 
 ## Resumen de Diagnóstico
-El sistema es actualmente un **"Frontend Shell"**: una cáscara vacía pero visualmente completa. Todos los módulos operativos requieren ser recableados para usar servicios HTTP reales en lugar de importar constantes.
+El sistema ha avanzado a **Fase 1**. La infraestructura base (Axios, AuthContext, Variables de Entorno) ya está implementada. El siguiente paso crítico es conectar los módulos de negocio (Fase 2).
