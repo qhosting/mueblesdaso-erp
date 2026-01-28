@@ -1,9 +1,36 @@
-
-import React from 'react';
-import { Box, AlertTriangle, ArrowUpRight, ArrowDownLeft, Search, Database, Package } from 'lucide-react';
-import { MOCK_INVENTORY } from '../constants';
+import React, { useState, useEffect } from 'react';
+import { Box, AlertTriangle, ArrowUpRight, ArrowDownLeft, Search, Database, Package, Loader2, AlertCircle } from 'lucide-react';
+import { inventoryService } from '../src/services/inventory.service';
+import { InventoryItem } from '../types';
 
 const InventoryModule: React.FC = () => {
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchInventory = async () => {
+      try {
+        setLoading(true);
+        const data = await inventoryService.getAll();
+        setInventory(data);
+      } catch (err) {
+        console.error(err);
+        setError('Error al cargar inventario.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInventory();
+  }, []);
+
+  if (loading) return <div className="flex h-full items-center justify-center text-slate-400"><Loader2 className="animate-spin mr-2" /> Cargando inventario...</div>;
+  if (error) return <div className="flex h-full items-center justify-center text-red-500 font-bold"><AlertCircle className="mr-2" /> {error}</div>;
+
+  const totalItems = inventory.length; // Simplified for now
+  const lowStock = inventory.filter(i => i.stock_actual <= i.stock_minimo).length;
+  const warehouses = new Set(inventory.map(i => i.ubicacion)).size;
+
   return (
     <div className="p-6 h-full flex flex-col space-y-6">
       <header className="flex justify-between items-center">
@@ -29,9 +56,9 @@ const InventoryModule: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'Total de Artículos', val: '26', icon: <Box size={20} />, color: 'bg-blue-600' },
-          { label: 'Stock Bajo Mínimo', val: '1', icon: <AlertTriangle size={20} />, color: 'bg-red-600' },
-          { label: 'Almacenes Activos', val: '2', icon: <Database size={20} />, color: 'bg-slate-900' },
+          { label: 'Total de Artículos', val: totalItems.toString(), icon: <Box size={20} />, color: 'bg-blue-600' },
+          { label: 'Stock Bajo Mínimo', val: lowStock.toString(), icon: <AlertTriangle size={20} />, color: 'bg-red-600' },
+          { label: 'Almacenes Activos', val: warehouses.toString(), icon: <Database size={20} />, color: 'bg-slate-900' },
         ].map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-200 flex justify-between items-center shadow-sm">
             <div>
@@ -67,7 +94,7 @@ const InventoryModule: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {MOCK_INVENTORY.map((item) => (
+              {inventory.map((item) => (
                 <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
                   <td className="px-8 py-5">
                     <p className="font-black text-slate-800 text-sm uppercase">{item.nombre}</p>

@@ -12,10 +12,10 @@ Este documento detalla el nivel de avance actual de cada módulo del sistema fro
 | Módulo | Estado Visual | Lógica de Datos | Estado General | Notas Técnicas |
 | :--- | :---: | :---: | :---: | :--- |
 | **Autenticación (Login)** | ✅ | 🔌/🧠 | ✅ Completado | UI lista, servicio Auth integrado. Usa Fallback Mock si falla API. |
+| **ClientsModule** (Cartera) | ✅ | 🔌/🧠 | ✅ Completado | Conectado a `ClientsService`. Usa Fallback Mock en DEV. |
+| **InventoryModule** (Inventario) | ✅ | 🔌/🧠 | ✅ Completado | Conectado a `InventoryService`. Usa Fallback Mock en DEV. |
 | **Dashboard** (Panel Ejecutivo) | 🎨 | 🧠 | 🚧 Prototipo | Consume `MOCK_CLIENTS` para calcular balances totales. Falta endpoint `/stats`. |
-| **ClientsModule** (Cartera) | 🎨 | 🧠 | 🚧 Prototipo | Tablas y filtrado funcionan en local. Falta CRUD real contra `/clients`. |
 | **SalesModule** (Ventas) | 🎨 | 🧠 | 🚧 Prototipo | Carrito de compras funcional en memoria. No registra ventas en DB. |
-| **InventoryModule** (Inventario) | 🎨 | 🧠 | 🚧 Prototipo | Visualización de stock estático. Falta sincronización real. |
 | **CollectionIntelligence** (Mora) | 🎨 | 🧠 | 🚧 Prototipo | Cálculos de aging hechos en cliente. Deberían venir pre-calculados del backend. |
 | **FieldApp** (App de Campo) | 🎨 | 🧠 | 🚧 Prototipo | Simulación de ruta de cobro. Falta geolocalización real y POST de pagos. |
 | **ConfigTerminal** (DevOps) | 🎨 | N/A | ✅ Estático | Muestra logs simulados o configuración local. |
@@ -24,4 +24,4 @@ Este documento detalla el nivel de avance actual de cada módulo del sistema fro
 ---
 
 ## Resumen de Diagnóstico
-El sistema ha avanzado a **Fase 1**. La infraestructura base (Axios, AuthContext, Variables de Entorno) ya está implementada. El siguiente paso crítico es conectar los módulos de negocio (Fase 2).
+El sistema ha completado **Fase 2**. Los módulos de datos maestros (Clientes e Inventario) ahora intentan conectar con la API real, degradándose graciosamente a mocks si el backend no está disponible.

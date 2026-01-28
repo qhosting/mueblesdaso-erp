@@ -15,18 +15,18 @@ Este plan define la estrategia para transformar el prototipo actual en un sistem
     *   Implementar persistencia del Token JWT.
     *   Proteger rutas (Redirección automática a Login).
 
-## Fase 2: Datos Maestros (Semana 2 - Pendiente)
+## Fase 2: Datos Maestros (✅ Completado)
 **Objetivo**: Poblar el sistema con información real de la base de datos.
 
-1.  **Módulo de Clientes**:
+1.  **Módulo de Clientes** (✅):
     *   Reemplazar `MOCK_CLIENTS` por `ClientsService.getAll()`.
     *   Implementar paginación en el servidor (si la base de datos es grande).
     *   Habilitar la vista de detalle de cliente con datos reales (Historial, Saldos).
-2.  **Módulo de Inventario**:
+2.  **Módulo de Inventario** (✅):
     *   Conectar `InventoryService` para leer productos y stock en tiempo real.
     *   Sustituir `MOCK_INVENTORY` y `MOCK_PRODUCTS`.
 
-## Fase 3: Transacciones y Operación (Semana 3)
+## Fase 3: Transacciones y Operación (Semana 3 - Pendiente)
 **Objetivo**: Permitir que el negocio opere (vender y cobrar).
 
 1.  **Ventas (SalesModule)**:
@@ -54,5 +54,5 @@ Este plan define la estrategia para transformar el prototipo actual en un sistem
 
 ## Estrategia de Ejecución Recomendada
 
-Actualmente se ha completado la **Fase 1**.
-Siguiente paso recomendado: **Comenzar Fase 2 con el Módulo de Clientes**, ya que es la base para Ventas y Cobranza.
+Actualmente se ha completado la **Fase 2**.
+Siguiente paso recomendado: **Avanzar a la Fase 3**, enfocándose en el módulo de Ventas y Cobranza para cerrar el ciclo operativo.

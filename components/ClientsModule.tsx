@@ -1,14 +1,14 @@
-
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Users, Search, Filter, Info, MapPin, Phone, Calendar, CreditCard, X, 
   ChevronRight, History, ReceiptText, UserCircle, Map as MapIcon, ExternalLink,
   Briefcase, BarChart3, ArrowDownToLine, AlertCircle, Table as TableIcon, TrendingUp,
   BrainCircuit, FileSpreadsheet, MessageSquare, Clock, Package, Calculator,
-  Send, Save, Trash2, CheckSquare, ShieldCheck, ArrowLeft, TrendingDown, Target
+  Send, Save, Trash2, CheckSquare, ShieldCheck, ArrowLeft, TrendingDown, Target, Loader2
 } from 'lucide-react';
-import { MOCK_CLIENTS, MOCK_PAYMENTS, MOCK_COLLECTORS } from '../constants';
+import { MOCK_PAYMENTS, MOCK_COLLECTORS } from '../constants';
 import { Client, Collector, AgingRow, Payment } from '../types';
+import { clientsService } from '../src/services/clients.service';
 
 interface Note {
   id: string;
@@ -19,6 +19,10 @@ interface Note {
 }
 
 const ClientsModule: React.FC = () => {
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [filterStatus, setFilterStatus] = useState('ALL');
@@ -36,19 +40,36 @@ const ClientsModule: React.FC = () => {
 
   const TODAY = new Date('2024-04-01');
 
+  // Cargar clientes al iniciar
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        setLoading(true);
+        const data = await clientsService.getAll();
+        setClients(data);
+      } catch (err) {
+        console.error(err);
+        setError('Error al cargar la cartera de clientes.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchClients();
+  }, []);
+
   const filteredClients = useMemo(() => {
-    return MOCK_CLIENTS.filter(client => {
+    return clients.filter(client => {
       const matchesSearch = client.nombre_ccliente.toLowerCase().includes(searchTerm.toLowerCase()) || 
                            client.contrato_cliente.includes(searchTerm);
       const matchesStatus = filterStatus === 'ALL' || client.status_cliente === filterStatus;
       const matchesGestor = filterGestor === 'ALL' || client.codigo_gestor === filterGestor;
       return matchesSearch && matchesStatus && matchesGestor;
     });
-  }, [searchTerm, filterStatus, filterGestor]);
+  }, [searchTerm, filterStatus, filterGestor, clients]);
 
   const collectorSummaries = useMemo(() => {
     return MOCK_COLLECTORS.map(collector => {
-      const assigned = MOCK_CLIENTS.filter(c => c.codigo_gestor === collector.id_gestor);
+      const assigned = clients.filter(c => c.codigo_gestor === collector.id_gestor);
       const totalBalance = assigned.reduce((sum, c) => sum + c.saldo_actualcli, 0);
       const overdueBalance = assigned.reduce((sum, c) => sum + c.semdv, 0);
       
@@ -60,10 +81,10 @@ const ClientsModule: React.FC = () => {
         riskPercentage: totalBalance > 0 ? (overdueBalance / totalBalance) * 100 : 0
       };
     }).sort((a, b) => b.overdueBalance - a.overdueBalance);
-  }, []);
+  }, [clients]);
 
   const agingData = useMemo(() => {
-    return MOCK_CLIENTS.map(client => {
+    return clients.map(client => {
       const clientPayments = MOCK_PAYMENTS.filter(p => p.cod_cliente === client.cod_cliente);
       const lastPaymentDate = clientPayments.length > 0 
         ? new Date(clientPayments[0].fechap) 
@@ -99,7 +120,7 @@ const ClientsModule: React.FC = () => {
         totalGeneral: client.saldo_actualcli
       } as AgingRow;
     });
-  }, [TODAY]);
+  }, [clients, TODAY]);
 
   const getNombreGestor = (codigo: string) => {
     const gestor = MOCK_COLLECTORS.find(g => g.id_gestor === codigo);
@@ -128,6 +149,14 @@ const ClientsModule: React.FC = () => {
     setSelectedClient(null);
     setIsManaging(false);
   };
+
+  if (loading) {
+      return <div className="flex h-full items-center justify-center text-slate-400"><Loader2 className="animate-spin mr-2" /> Cargando cartera...</div>;
+  }
+
+  if (error) {
+      return <div className="flex h-full items-center justify-center text-red-500 font-bold"><AlertCircle className="mr-2" /> {error}</div>;
+  }
 
   return (
     <div className="p-6 h-full flex flex-col space-y-6 bg-slate-50">
