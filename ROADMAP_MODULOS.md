@@ -12,11 +12,11 @@ Este documento detalla el nivel de avance actual de cada módulo del sistema fro
 | Módulo | Estado Visual | Lógica de Datos | Estado General | Notas Técnicas |
 | :--- | :---: | :---: | :---: | :--- |
 | **Autenticación (Login)** | ✅ | 🔌/🧠 | ✅ Completado | UI lista, servicio Auth integrado. Usa Fallback Mock si falla API. |
-| **ClientsModule** (Cartera) | ✅ | 🔌/🧠 | ✅ Completado | Conectado a `ClientsService`. Usa Fallback Mock en DEV. |
+| **ClientsModule** (Cartera) | ✅ | 🔌/🧠 | ✅ Completado | Conectado a `ClientsService` y `WahaService`. Usa Fallback Mock en DEV. |
 | **InventoryModule** (Inventario) | ✅ | 🔌/🧠 | ✅ Completado | Conectado a `InventoryService`. Usa Fallback Mock en DEV. |
 | **Dashboard** (Panel Ejecutivo) | ✅ | 🔌/🧠 | ✅ Completado | Conectado a `DashboardService`. Usa Fallback Mock en DEV. |
 | **SalesModule** (Ventas) | ✅ | 🔌/🧠 | ✅ Completado | Checkout real vía `SalesService`. Validaciones de stock asíncronas. |
-| **FieldApp** (App de Campo) | ✅ | 🔌/🧠 | ✅ Completado | Registro de pagos conectado a `PaymentsService`. |
+| **FieldApp** (App de Campo) | ✅ | 🔌/🧠 | ✅ Completado | Registro de pagos vía `PaymentsService`. Soporte PWA/Offline instalado. |
 | **CollectionIntelligence** (Mora) | 🎨 | 🧠 | 🚧 Prototipo | Cálculos de aging hechos en cliente. Falta servicio dedicado. |
 | **ConfigTerminal** (DevOps) | 🎨 | N/A | ✅ Estático | Muestra logs simulados o configuración local. |
 | **LandingPage** (Pública) | 🎨 | N/A | ✅ Completo | Página estática informativa. |
@@ -24,4 +24,4 @@ Este documento detalla el nivel de avance actual de cada módulo del sistema fro
 ---
 
 ## Resumen de Diagnóstico
-El sistema ha completado **Fase 3**. El núcleo transaccional (Ventas y Cobranza) y el Dashboard administrativo ya están integrados a la capa de servicios. Quedan pendientes integraciones avanzadas (Waha, Offline).
+El sistema ha completado **Fase 4**. Se han integrado funcionalidades avanzadas como PWA (Service Workers), sistema de notificaciones y conexión con API de WhatsApp (Waha). El sistema está funcionalmente completo para una versión 1.0.

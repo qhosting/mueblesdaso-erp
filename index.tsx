@@ -1,9 +1,22 @@
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
+import App from './App';
+import { registerSW } from 'virtual:pwa-register';
 
 console.log("🚀 Mueblesdaso: Iniciando secuencia de arranque...");
+
+// Register Service Worker
+const updateSW = registerSW({
+  onNeedRefresh() {
+    if (confirm('Nueva versión disponible. ¿Recargar?')) {
+      updateSW(true);
+    }
+  },
+  onOfflineReady() {
+    console.log('App lista para trabajar offline');
+  },
+});
 
 const mountApp = () => {
   const rootElement = document.getElementById('root');

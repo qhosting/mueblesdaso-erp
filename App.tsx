@@ -1,18 +1,37 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Smartphone, Terminal, Home, LogOut, ShieldAlert, Users, ShoppingBag, Package, Loader2 } from 'lucide-react';
-import Dashboard from './components/Dashboard.tsx';
-import FieldApp from './components/FieldApp.tsx';
-import ConfigTerminal from './components/ConfigTerminal.tsx';
-import LandingPage from './components/LandingPage.tsx';
-import CollectionIntelligence from './components/CollectionIntelligence.tsx';
-import ClientsModule from './components/ClientsModule.tsx';
-import SalesModule from './components/SalesModule.tsx';
-import InventoryModule from './components/InventoryModule.tsx';
-import Login from './components/Login.tsx';
+import { LayoutDashboard, Smartphone, Terminal, Home, LogOut, ShieldAlert, Users, ShoppingBag, Package, Loader2, Bell, X } from 'lucide-react';
+import Dashboard from './components/Dashboard';
+import FieldApp from './components/FieldApp';
+import ConfigTerminal from './components/ConfigTerminal';
+import LandingPage from './components/LandingPage';
+import CollectionIntelligence from './components/CollectionIntelligence';
+import ClientsModule from './components/ClientsModule';
+import SalesModule from './components/SalesModule';
+import InventoryModule from './components/InventoryModule';
+import Login from './components/Login';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { NotificationProvider, useNotification } from './src/context/NotificationContext';
 import { ENV } from './src/config/env';
 
 type ViewState = 'landing' | 'admin' | 'field' | 'devops' | 'intelligence' | 'clients' | 'sales' | 'inventory';
+
+const ToastContainer: React.FC = () => {
+  const { notifications, removeNotification } = useNotification();
+
+  if (notifications.length === 0) return null;
+
+  return (
+    <div className="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
+      {notifications.map(n => (
+        <div key={n.id} className="pointer-events-auto bg-slate-900 text-white p-4 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-right fade-in duration-300 min-w-[300px]">
+          <Bell size={18} className="text-blue-400" />
+          <p className="text-xs font-bold flex-1">{n.message}</p>
+          <button onClick={() => removeNotification(n.id)} className="text-slate-500 hover:text-white"><X size={14} /></button>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const MainLayout: React.FC = () => {
   const [view, setView] = useState<ViewState>('admin');
@@ -30,6 +49,8 @@ const MainLayout: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden text-slate-700">
+      <ToastContainer />
+
       {/* Barra Lateral de Navegación */}
       <aside className="w-20 lg:w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0 border-r border-slate-800">
         <div className="p-6 flex items-center gap-3 border-b border-slate-800">
@@ -120,9 +141,11 @@ const MainLayout: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <MainLayout />
-    </AuthProvider>
+    <NotificationProvider>
+      <AuthProvider>
+        <MainLayout />
+      </AuthProvider>
+    </NotificationProvider>
   );
 };
 
