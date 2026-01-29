@@ -1,19 +1,37 @@
-# Lista de Pendientes Operativos (Post-Lanzamiento)
+# Plan de Evolución Post-Lanzamiento (Pendientes)
 
-Este documento reemplaza al antiguo `TODO.md` y se enfoca en tareas de mantenimiento, despliegue y estabilización.
+Este documento estructura las tareas restantes en fases lógicas para dar continuidad al proyecto tras la implementación de la versión 1.0.
 
-## 🔴 Prioridad Alta: Infraestructura
-- [ ] **Configurar Backend**: Asegurar que el servicio `backend-api` en Easypanel esté corriendo y conectado a la DB.
-- [ ] **Variables de Entorno**:
-    - [ ] `VITE_API_URL` en el servicio Frontend.
-    - [ ] `GOOGLE_SERVICE_ACCOUNT_JSON` en el servicio Backup Worker.
-- [ ] **DNS**: Verificar que `api.mueblesdaso.com` resuelva correctamente.
+## Fase 5: Estabilización Operativa (Prioridad Inmediata)
+**Objetivo:** Garantizar que la infraestructura desplegada funcione correctamente y sea segura.
 
-## 🟡 Prioridad Media: Refinamiento
-- [ ] **Collection Intelligence**: Migrar la lógica de cálculo de mora al backend (actualmente el frontend calcula sobre datos crudos).
-- [ ] **Limpieza de Mocks**: Eliminar el archivo `constants.ts` una vez que se confirme que el backend cubre el 100% de los casos de uso.
-- [ ] **Tests**: Crear una suite de pruebas E2E para el flujo de "Venta -> Cobro -> Backup".
+- [ ] **Infraestructura Backend**:
+    - [ ] Verificar estado "Running" de `backend-api` en Easypanel.
+    - [ ] Confirmar conexión exitosa entre `backend-api` y `mariadb`.
+- [ ] **Configuración de Entorno**:
+    - [ ] Configurar variable `VITE_API_URL` en el servicio Frontend (PWA).
+    - [ ] Configurar `GOOGLE_SERVICE_ACCOUNT_JSON` en el microservicio Backup Worker.
+- [ ] **Red y DNS**:
+    - [ ] Validar resolución DNS para `api.mueblesdaso.com`.
+    - [ ] Validar certificado SSL activo.
 
-## 🟢 Prioridad Baja: Futuras Mejoras
-- [ ] **Reportes PDF**: Generar estados de cuenta descargables en el Dashboard.
-- [ ] **Rutas Optimizadas**: Algoritmo para ordenar la ruta de cobro por distancia GPS.
+## Fase 6: Calidad y Refinamiento (Corto Plazo)
+**Objetivo:** Eliminar deuda técnica y asegurar la integridad de los datos.
+
+- [ ] **Limpieza de Código**:
+    - [ ] Migrar lógica de "Collection Intelligence" (Cálculo de Mora) al backend.
+    - [ ] Eliminar archivo `constants.ts` y todas las referencias a datos Mock una vez validado el backend.
+- [ ] **Aseguramiento de Calidad (QA)**:
+    - [ ] Implementar Tests E2E (Playwright) para el flujo crítico: Login -> Venta -> Cobro.
+    - [ ] Verificar restauración de backups (Descargar un ZIP de Drive y restaurarlo en un entorno local de prueba).
+
+## Fase 7: Optimización y Expansión (Mediano Plazo)
+**Objetivo:** Agregar valor al negocio mediante nuevas funcionalidades.
+
+- [ ] **Reportes Avanzados**:
+    - [ ] Generación de PDFs para estados de cuenta de clientes.
+    - [ ] Exportación de reportes de ventas a Excel/CSV.
+- [ ] **Logística**:
+    - [ ] Algoritmo de optimización de rutas de cobranza (Travelling Salesman Problem) usando GeoJSON.
+- [ ] **Automatización**:
+    - [ ] Bot de WhatsApp para consulta de saldo automática por parte de los clientes.
