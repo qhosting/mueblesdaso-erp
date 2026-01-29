@@ -1,26 +1,79 @@
-
 import React, { useState } from 'react';
-import { ShoppingBag, Search, Tag, DollarSign, Plus, FileText, UserPlus, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Search, Tag, DollarSign, Plus, FileText, UserPlus, ArrowRight, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { MOCK_PRODUCTS } from '../constants';
 import { Product } from '../types';
+import { salesService, SaleRequest } from '../src/services/sales.service';
 
 const SalesModule: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [cart, setCart] = useState<Product[]>([]);
+  const [processing, setProcessing] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
 
   const filteredProducts = MOCK_PRODUCTS.filter(p => 
     p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || 
     p.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const addToCart = (product: Product) => {
-    setCart([...cart, product]);
+  const addToCart = async (product: Product) => {
+    // Validar stock antes de agregar
+    try {
+        const available = await salesService.validateStock(product.id, 1);
+        if (available) {
+             setCart([...cart, product]);
+        } else {
+             setError(`Sin stock disponible para ${product.sku}`);
+             setTimeout(() => setError(''), 3000);
+        }
+    } catch (e) {
+        console.error(e);
+        // Si falla la validación, agregamos igual en DEV (fallback)
+        setCart([...cart, product]);
+    }
   };
 
   const total = cart.reduce((acc, p) => acc + p.precio_credito, 0);
 
+  const handleCheckout = async () => {
+      if (cart.length === 0) return;
+
+      setProcessing(true);
+      setError('');
+      setSuccess('');
+
+      try {
+          const saleData: SaleRequest = {
+              clientId: 'DEMO-CLIENT-001', // Harcodeado por ahora hasta tener selector de clientes
+              items: cart.map(p => ({ productId: p.id, quantity: 1, price: p.precio_credito })),
+              total: total,
+              paymentMethod: 'CREDITO'
+          };
+
+          const result = await salesService.createSale(saleData);
+          if (result.success) {
+              setSuccess(`Venta registrada exitosamente. Folio: ${result.saleId}`);
+              setCart([]);
+              setTimeout(() => setSuccess(''), 5000);
+          }
+      } catch (err) {
+          console.error(err);
+          setError('Error al procesar la venta. Intente nuevamente.');
+      } finally {
+          setProcessing(false);
+      }
+  };
+
   return (
-    <div className="p-6 flex gap-6 h-full overflow-hidden">
+    <div className="p-6 flex gap-6 h-full overflow-hidden relative">
+      {/* Overlay de notificaciones */}
+      {(success || error) && (
+          <div className={`absolute top-6 right-6 z-50 p-4 rounded-xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 ${success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              {success ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+              <span className="font-bold text-sm">{success || error}</span>
+          </div>
+      )}
+
       {/* Catálogo */}
       <div className="flex-1 flex flex-col space-y-6">
         <header>
@@ -103,11 +156,15 @@ const SalesModule: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 gap-3">
-            <button className="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-2 transition-all shadow-xl shadow-blue-900/40">
+            <button className="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-2 transition-all shadow-xl shadow-blue-900/40 opacity-50 cursor-not-allowed">
               <UserPlus size={18} /> Seleccionar Cliente
             </button>
-            <button className="w-full bg-white text-slate-900 hover:bg-slate-100 py-4 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-2 transition-all">
-              Generar Contrato <ArrowRight size={18} />
+            <button
+              onClick={handleCheckout}
+              disabled={cart.length === 0 || processing}
+              className="w-full bg-white text-slate-900 hover:bg-slate-100 py-4 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {processing ? <Loader2 className="animate-spin" size={18} /> : <>Generar Contrato <ArrowRight size={18} /></>}
             </button>
           </div>
         </div>

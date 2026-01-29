@@ -1,12 +1,12 @@
-
 import React, { useState, useMemo } from 'react';
 import { 
   MapPin, Phone, MessageSquare, CreditCard, ChevronRight, CheckCircle2, 
   Search, ArrowLeft, Navigation, Calendar, DollarSign, Activity, 
-  Map as MapIcon, MoreVertical, X, Check, Clock, AlertCircle
+  Map as MapIcon, MoreVertical, X, Check, Clock, AlertCircle, Loader2
 } from 'lucide-react';
 import { MOCK_CLIENTS } from '../constants';
 import { Client } from '../types';
+import { paymentsService } from '../src/services/payments.service';
 
 const FieldApp: React.FC = () => {
   const [view, setView] = useState<'home' | 'route' | 'details' | 'payment' | 'success'>('home');
@@ -15,6 +15,9 @@ const FieldApp: React.FC = () => {
   const [visitedClients, setVisitedClients] = useState<number[]>([]);
   const [totalCollectedToday, setTotalCollectedToday] = useState(0);
 
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState('');
+
   const pendingClients = MOCK_CLIENTS.filter(c => !visitedClients.includes(c.id_cliente));
   
   const handleClientSelect = (client: Client) => {
@@ -22,11 +25,31 @@ const FieldApp: React.FC = () => {
     setView('details');
   };
 
-  const handlePayment = () => {
-    const paymentAmount = parseFloat(amount);
-    setTotalCollectedToday(prev => prev + paymentAmount);
-    setVisitedClients(prev => [...prev, selectedClient!.id_cliente]);
-    setView('success');
+  const handlePayment = async () => {
+    if (!selectedClient || !amount) return;
+
+    setProcessing(true);
+    setError('');
+
+    try {
+        const result = await paymentsService.registerPayment({
+            clientId: selectedClient.id_cliente,
+            amount: parseFloat(amount),
+            paymentMethod: 'EFECTIVO'
+        });
+
+        if (result.success) {
+            const paymentAmount = parseFloat(amount);
+            setTotalCollectedToday(prev => prev + paymentAmount);
+            setVisitedClients(prev => [...prev, selectedClient.id_cliente]);
+            setView('success');
+        }
+    } catch (err) {
+        console.error(err);
+        setError('Error al registrar cobro. Intente nuevamente.');
+    } finally {
+        setProcessing(false);
+    }
   };
 
   const resetProcess = () => {
@@ -284,14 +307,19 @@ const FieldApp: React.FC = () => {
               </div>
             </div>
 
+            {error && (
+                <div className="px-10 text-center text-red-500 font-bold text-xs flex items-center justify-center gap-2">
+                    <AlertCircle size={14} /> {error}
+                </div>
+            )}
+
             <div className="p-10 space-y-4">
               <button 
                 onClick={handlePayment}
-                disabled={!amount}
+                disabled={!amount || processing}
                 className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-black py-6 rounded-[2rem] flex items-center justify-center gap-3 shadow-2xl shadow-blue-900/40 transition-all uppercase tracking-widest active:scale-95"
               >
-                <CreditCard className="w-6 h-6" />
-                Validar y Generar Recibo
+                {processing ? <Loader2 className="animate-spin" /> : <><CreditCard className="w-6 h-6" /> Validar y Generar Recibo</>}
               </button>
               <button onClick={() => setView('details')} className="w-full text-slate-500 font-black uppercase text-[10px] tracking-widest py-2">Volver</button>
             </div>
@@ -314,7 +342,7 @@ const FieldApp: React.FC = () => {
               </div>
               <div className="flex justify-between items-center text-sm border-t border-white/10 pt-4">
                 <span className="font-black uppercase opacity-60 text-[10px] tracking-widest">Folio</span>
-                <span className="font-mono font-bold tracking-widest">REC-992381</span>
+                <span className="font-mono font-bold tracking-widest">REC-{Math.floor(Math.random() * 100000)}</span>
               </div>
             </div>
 

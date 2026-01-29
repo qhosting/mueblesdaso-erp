@@ -1,23 +1,34 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   AreaChart, Area, PieChart, Pie, Cell 
 } from 'recharts';
-import { TrendingUp, Users, DollarSign, Activity, Database, AlertCircle } from 'lucide-react';
-import { DB_CONFIG, MOCK_CLIENTS } from '../constants';
-
-const pieData = [
-  { name: 'Al Corriente', value: 70 },
-  { name: 'Mora 30d', value: 20 },
-  { name: 'Mora Crítica 90d+', value: 10 },
-];
+import { TrendingUp, Users, DollarSign, Activity, Database, AlertCircle, Loader2 } from 'lucide-react';
+import { DB_CONFIG } from '../constants';
+import { dashboardService, DashboardStats } from '../src/services/dashboard.service';
 
 const COLORS = ['#10b981', '#f59e0b', '#ef4444'];
 
 const Dashboard: React.FC = () => {
-  const totalBalance = MOCK_CLIENTS.reduce((acc, c) => acc + c.saldo_actualcli, 0);
-  const totalOverdue = MOCK_CLIENTS.reduce((acc, c) => acc + c.semdv, 0);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await dashboardService.getStats();
+        setStats(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  if (loading) return <div className="h-full flex items-center justify-center text-slate-400"><Loader2 className="animate-spin mr-2" /> Cargando métricas...</div>;
+  if (!stats) return <div className="h-full flex items-center justify-center text-red-500">Error al cargar datos</div>;
 
   return (
     <div className="p-6 space-y-6">
@@ -39,10 +50,10 @@ const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { title: 'Cartera Total', value: `$${totalBalance.toLocaleString()}`, status: 'neutral', icon: <DollarSign className="w-6 h-6 text-blue-500" /> },
-          { title: 'Saldo en Mora (Vencido)', value: `$${totalOverdue.toLocaleString()}`, status: 'danger', icon: <AlertCircle className="w-6 h-6 text-red-500" /> },
-          { title: 'Clientes Totales', value: MOCK_CLIENTS.length.toString(), status: 'neutral', icon: <Users className="w-6 h-6 text-purple-500" /> },
-          { title: 'Eficiencia de Cobro', value: '88.5%', status: 'success', icon: <Activity className="w-6 h-6 text-green-500" /> },
+          { title: 'Cartera Total', value: `$${stats.totalBalance.toLocaleString()}`, status: 'neutral', icon: <DollarSign className="w-6 h-6 text-blue-500" /> },
+          { title: 'Saldo en Mora (Vencido)', value: `$${stats.totalOverdue.toLocaleString()}`, status: 'danger', icon: <AlertCircle className="w-6 h-6 text-red-500" /> },
+          { title: 'Clientes Totales', value: stats.totalClients.toString(), status: 'neutral', icon: <Users className="w-6 h-6 text-purple-500" /> },
+          { title: 'Eficiencia de Cobro', value: `${stats.collectionEfficiency}%`, status: 'success', icon: <Activity className="w-6 h-6 text-green-500" /> },
         ].map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
             <div className="flex justify-between items-start">
@@ -61,12 +72,7 @@ const Dashboard: React.FC = () => {
           <h2 className="text-lg font-bold mb-6 text-slate-700">Flujo de Cobranza Mensual (Proyectado vs Real)</h2>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={[
-                { name: 'Sem 1', value: 12400, real: 11000 },
-                { name: 'Sem 2', value: 15000, real: 14500 },
-                { name: 'Sem 3', value: 11800, real: 10200 },
-                { name: 'Sem 4', value: 19000, real: 17800 },
-              ]}>
+              <AreaChart data={stats.projectedCollection}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} />
                 <YAxis axisLine={false} tickLine={false} />
@@ -85,15 +91,15 @@ const Dashboard: React.FC = () => {
           <div className="h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={pieData} innerRadius={70} outerRadius={90} paddingAngle={5} dataKey="value">
-                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                <Pie data={stats.portfolioDistribution} innerRadius={70} outerRadius={90} paddingAngle={5} dataKey="value">
+                  {stats.portfolioDistribution.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                 </Pie>
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
           </div>
           <div className="space-y-3 mt-6">
-            {pieData.map((entry, i) => (
+            {stats.portfolioDistribution.map((entry, i) => (
               <div key={i} className="flex justify-between items-center text-sm p-2 rounded-lg bg-slate-50">
                 <div className="flex items-center">
                   <div className="w-3 h-3 rounded-full mr-3 shadow-sm" style={{ backgroundColor: COLORS[i] }} />

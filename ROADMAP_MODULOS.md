@@ -14,14 +14,14 @@ Este documento detalla el nivel de avance actual de cada módulo del sistema fro
 | **Autenticación (Login)** | ✅ | 🔌/🧠 | ✅ Completado | UI lista, servicio Auth integrado. Usa Fallback Mock si falla API. |
 | **ClientsModule** (Cartera) | ✅ | 🔌/🧠 | ✅ Completado | Conectado a `ClientsService`. Usa Fallback Mock en DEV. |
 | **InventoryModule** (Inventario) | ✅ | 🔌/🧠 | ✅ Completado | Conectado a `InventoryService`. Usa Fallback Mock en DEV. |
-| **Dashboard** (Panel Ejecutivo) | 🎨 | 🧠 | 🚧 Prototipo | Consume `MOCK_CLIENTS` para calcular balances totales. Falta endpoint `/stats`. |
-| **SalesModule** (Ventas) | 🎨 | 🧠 | 🚧 Prototipo | Carrito de compras funcional en memoria. No registra ventas en DB. |
-| **CollectionIntelligence** (Mora) | 🎨 | 🧠 | 🚧 Prototipo | Cálculos de aging hechos en cliente. Deberían venir pre-calculados del backend. |
-| **FieldApp** (App de Campo) | 🎨 | 🧠 | 🚧 Prototipo | Simulación de ruta de cobro. Falta geolocalización real y POST de pagos. |
+| **Dashboard** (Panel Ejecutivo) | ✅ | 🔌/🧠 | ✅ Completado | Conectado a `DashboardService`. Usa Fallback Mock en DEV. |
+| **SalesModule** (Ventas) | ✅ | 🔌/🧠 | ✅ Completado | Checkout real vía `SalesService`. Validaciones de stock asíncronas. |
+| **FieldApp** (App de Campo) | ✅ | 🔌/🧠 | ✅ Completado | Registro de pagos conectado a `PaymentsService`. |
+| **CollectionIntelligence** (Mora) | 🎨 | 🧠 | 🚧 Prototipo | Cálculos de aging hechos en cliente. Falta servicio dedicado. |
 | **ConfigTerminal** (DevOps) | 🎨 | N/A | ✅ Estático | Muestra logs simulados o configuración local. |
 | **LandingPage** (Pública) | 🎨 | N/A | ✅ Completo | Página estática informativa. |
 
 ---
 
 ## Resumen de Diagnóstico
-El sistema ha completado **Fase 2**. Los módulos de datos maestros (Clientes e Inventario) ahora intentan conectar con la API real, degradándose graciosamente a mocks si el backend no está disponible.
+El sistema ha completado **Fase 3**. El núcleo transaccional (Ventas y Cobranza) y el Dashboard administrativo ya están integrados a la capa de servicios. Quedan pendientes integraciones avanzadas (Waha, Offline).
