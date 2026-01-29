@@ -1,6 +1,6 @@
 # Roadmap: Estado de Módulos (Muebles Daso)
 
-Este documento detalla el nivel de avance actual de cada módulo del sistema frontend.
+Este documento detalla el nivel de avance actual de cada módulo del sistema.
 
 ## Simbología
 - 🎨 **UI Lista**: El diseño visual y la interactividad básica están terminados.
@@ -9,19 +9,30 @@ Este documento detalla el nivel de avance actual de cada módulo del sistema fro
 - 🚧 **En Progreso**: En desarrollo activo.
 - ✅ **Completado**: Funcional y listo para producción.
 
+### Frontend (PWA)
+
 | Módulo | Estado Visual | Lógica de Datos | Estado General | Notas Técnicas |
 | :--- | :---: | :---: | :---: | :--- |
-| **Autenticación (Login)** | ✅ | 🔌/🧠 | ✅ Completado | UI lista, servicio Auth integrado. Usa Fallback Mock si falla API. |
-| **ClientsModule** (Cartera) | ✅ | 🔌/🧠 | ✅ Completado | Conectado a `ClientsService` y `WahaService`. Usa Fallback Mock en DEV. |
-| **InventoryModule** (Inventario) | ✅ | 🔌/🧠 | ✅ Completado | Conectado a `InventoryService`. Usa Fallback Mock en DEV. |
-| **Dashboard** (Panel Ejecutivo) | ✅ | 🔌/🧠 | ✅ Completado | Conectado a `DashboardService`. Usa Fallback Mock en DEV. |
-| **SalesModule** (Ventas) | ✅ | 🔌/🧠 | ✅ Completado | Checkout real vía `SalesService`. Validaciones de stock asíncronas. |
-| **FieldApp** (App de Campo) | ✅ | 🔌/🧠 | ✅ Completado | Registro de pagos vía `PaymentsService`. Soporte PWA/Offline instalado. |
-| **CollectionIntelligence** (Mora) | 🎨 | 🧠 | 🚧 Prototipo | Cálculos de aging hechos en cliente. Falta servicio dedicado. |
-| **ConfigTerminal** (DevOps) | 🎨 | N/A | ✅ Estático | Muestra logs simulados o configuración local. |
-| **LandingPage** (Pública) | 🎨 | N/A | ✅ Completo | Página estática informativa. |
+| **Autenticación (Login)** | ✅ | 🔌/🧠 | ✅ Completado | Integrado con `AuthService`. |
+| **ClientsModule** (Cartera) | ✅ | 🔌/🧠 | ✅ Completado | CRUD real vía API + Waha. |
+| **InventoryModule** (Inventario) | ✅ | 🔌/🧠 | ✅ Completado | Sincronización de stock en tiempo real. |
+| **Dashboard** (Panel Ejecutivo) | ✅ | 🔌/🧠 | ✅ Completado | Métricas desde backend (`DashboardService`). |
+| **SalesModule** (Ventas) | ✅ | 🔌/🧠 | ✅ Completado | Checkout transaccional. Stock check. |
+| **FieldApp** (App de Campo) | ✅ | 🔌/🧠 | ✅ Completado | Pagos, Geolocalización y Modo Offline (PWA). |
+| **CollectionIntelligence** (Mora) | 🎨 | 🧠 | 🚧 Prototipo | Lógica de cálculo en cliente. Pendiente migrar a backend. |
+| **ConfigTerminal** (DevOps) | 🎨 | N/A | ✅ Estático | UI de configuración. |
+| **LandingPage** (Pública) | 🎨 | N/A | ✅ Completo | Informativa. |
+
+### Backend & Infraestructura
+
+| Componente | Estado | Descripción |
+| :--- | :---: | :--- |
+| **API Gateway** | ✅ | Accesible vía `api.mueblesdaso.com` (Configurado en cliente). |
+| **Backup Worker** | ✅ | Microservicio Node.js para backups automáticos a Google Drive. |
+| **Docker Build** | ✅ | Optimizado (Multi-stage) y ligero (Alpine). |
+| **Base de Datos** | ❓ | Pendiente de verificación de conectividad en Easypanel. |
 
 ---
 
 ## Resumen de Diagnóstico
-El sistema ha completado **Fase 4**. Se han integrado funcionalidades avanzadas como PWA (Service Workers), sistema de notificaciones y conexión con API de WhatsApp (Waha). El sistema está funcionalmente completo para una versión 1.0.
+El sistema ha alcanzado la versión **v1.0 (Release Candidate)**. La funcionalidad principal está completa y conectada. El foco ahora debe estar en la **Verificación de Despliegue** y la operación de los servicios de soporte (Backup).
