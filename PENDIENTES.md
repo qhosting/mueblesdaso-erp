@@ -8,12 +8,12 @@ Este documento estructura las tareas restantes en fases lógicas para dar contin
 - [ ] **Infraestructura Backend**:
     - [ ] Verificar estado "Running" de `backend-api` en Easypanel.
     - [ ] Confirmar conexión exitosa entre `backend-api` y `mariadb`.
-- [ ] **Configuración de Entorno**:
-    - [ ] Configurar variable `VITE_API_URL` en el servicio Frontend (PWA).
+- [ ] **Configuración de Dominio Único**:
+    - [x] Nginx Reverse Proxy implementado (Frontend redirige `/api` al backend).
+    - [ ] Validar que `app.mueblesdaso.com/api/health` responda correctamente.
+    - [ ] Validar certificado SSL para `app.mueblesdaso.com`.
+- [ ] **Variables de Entorno**:
     - [ ] Configurar `GOOGLE_SERVICE_ACCOUNT_JSON` en el microservicio Backup Worker.
-- [ ] **Red y DNS**:
-    - [ ] Validar resolución DNS para `api.mueblesdaso.com`.
-    - [ ] Validar certificado SSL activo.
 
 ## Fase 6: Calidad y Refinamiento (Corto Plazo)
 **Objetivo:** Eliminar deuda técnica y asegurar la integridad de los datos.

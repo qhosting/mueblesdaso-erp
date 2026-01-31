@@ -36,7 +36,10 @@ Este plan define la estrategia de desarrollo, que ha evolucionado desde el proto
 
 2.  **Verificación de Producción (Pendiente)**:
     *   Confirmar conexión entre Frontend y Backend en Easypanel.
-    *   Validar DNS y SSL (`app.mueblesdaso.com` y `api.mueblesdaso.com`).
+    *   **Arquitectura de Dominio Único (Single Domain)**:
+        *   Frontend (`app.mueblesdaso.com`) sirve la UI.
+        *   Nginx redirige `/api` al backend interno (`backend-api:3000`).
+        *   Esto elimina la necesidad de `api.mueblesdaso.com`.
 
 3.  **Limpieza de Deuda Técnica**:
     *   Eliminar datos mock residuales en `CollectionIntelligence`.

@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
             start_url: '/',
             icons: [
               {
-                src: '/icon-192.png', // Assuming these exist or will use placeholder
+                src: '/icon-192.png',
                 sizes: '192x192',
                 type: 'image/png'
               },
@@ -38,7 +38,8 @@ export default defineConfig(({ mode }) => {
           workbox: {
             runtimeCaching: [
               {
-                urlPattern: /^https:\/\/api\.mueblesdaso\.com\/.*$/,
+                // Cachear llamadas a la API (ahora bajo la ruta relativa /api/)
+                urlPattern: /\/api\/.*/,
                 handler: 'NetworkFirst',
                 options: {
                   cacheName: 'api-cache',
