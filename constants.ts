@@ -1,11 +1,14 @@
 import { Client, Payment, Collector, Product, InventoryItem, User, UserRole } from './types';
 
 export const DB_CONFIG = {
-  host: '192.250.227.167',
-  user: 'mueblesdaso_cob',
-  pass: 'B4Dl6VlHDo',
-  db_name: 'mueblesdaso_cob'
+  // Configuración para PostgreSQL (Easypanel ready)
+  host: process.env.PGHOST || 'localhost',
+  user: process.env.PGUSER || 'postgres',
+  pass: process.env.PGPASSWORD || 'postgres',
+  db_name: process.env.PGDATABASE || 'mueblesdaso_erp',
+  port: parseInt(process.env.PGPORT || '5432')
 };
+
 
 export const MOCK_USERS: User[] = [
   { id: 'U01', nombre: 'Admin Master', email: 'admin@mueblesdaso.com', rol: UserRole.SUPER_ADMIN, estado: 'ACTIVO' },
@@ -136,12 +139,12 @@ services:
 volumes:
   db_data:`;
 
-export const SQL_SCHEMA = `-- ESQUEMA MAESTRO MUEBLESDASO ERP (OPTIMIZADO PARA MARIADB)
--- TABLAS CON PREFIJO app_ PARA NUEVA FUNCIONALIDAD
+export const SQL_SCHEMA = `-- ESQUEMA MAESTRO MUEBLESDASO ERP (OPTIMIZADO PARA POSTGRESQL)
+-- Versión compatible con Easypanel
 
 -- 1. Roles de Usuario
 CREATE TABLE IF NOT EXISTS app_roles (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   nombre VARCHAR(50) UNIQUE NOT NULL,
   descripcion TEXT
 );
@@ -154,57 +157,52 @@ CREATE TABLE IF NOT EXISTS app_users (
   nombre VARCHAR(255) NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
   rol_id INT,
-  status ENUM('ACTIVO', 'INACTIVO') DEFAULT 'ACTIVO',
-  last_login DATETIME,
+  status VARCHAR(20) DEFAULT 'ACTIVO' CHECK (status IN ('ACTIVO', 'INACTIVO')),
+  last_login TIMESTAMP,
   FOREIGN KEY (rol_id) REFERENCES app_roles(id) ON DELETE SET NULL
 );
 
--- 3. Transacciones (Relacionada con la tabla legacy cat_clientes)
--- Nota: cat_clientes debe existir previamente con el campo id_cliente
+-- 3. Transacciones
 CREATE TABLE IF NOT EXISTS app_transactions (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  tipo ENUM('PAGO', 'VENTA', 'CANCELACION', 'ABONO') NOT NULL,
+  id SERIAL PRIMARY KEY,
+  tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('PAGO', 'VENTA', 'CANCELACION', 'ABONO')),
   cliente_id INT NOT NULL,
-  monto DECIMAL(10,2) NOT NULL,
-  fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
-  user_id VARCHAR(50), -- Usuario que registró la transacción
+  monto DECIMAL(12,2) NOT NULL,
+  fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  user_id VARCHAR(50),
   folio_referencia VARCHAR(50),
-  metodo_pago ENUM('EFECTIVO', 'TRANSFERENCIA', 'BANCO', 'DEPOSITO') DEFAULT 'EFECTIVO',
+  metodo_pago VARCHAR(20) DEFAULT 'EFECTIVO' CHECK (metodo_pago IN ('EFECTIVO', 'TRANSFERENCIA', 'BANCO', 'DEPOSITO')),
   notas TEXT,
-  FOREIGN KEY (cliente_id) REFERENCES cat_clientes(id_cliente) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES app_users(id) ON DELETE SET NULL
 );
 
 -- 4. Inventario
 CREATE TABLE IF NOT EXISTS app_inventory (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   sku VARCHAR(50) NOT NULL,
   nombre VARCHAR(255) NOT NULL,
   current_stock INT DEFAULT 0,
   min_stock INT DEFAULT 5,
   location VARCHAR(100),
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 5. Logs de WhatsApp (Relacionada con cat_clientes)
+-- 5. Logs de WhatsApp
 CREATE TABLE IF NOT EXISTS app_whatsapp_logs (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   cliente_id INT NOT NULL,
   mensaje TEXT NOT NULL,
-  fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
-  status ENUM('ENVIADO', 'FALLIDO', 'LEIDO') DEFAULT 'ENVIADO',
-  wa_message_id VARCHAR(100),
-  FOREIGN KEY (cliente_id) REFERENCES cat_clientes(id_cliente) ON DELETE CASCADE
+  fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  status VARCHAR(20) DEFAULT 'ENVIADO' CHECK (status IN ('ENVIADO', 'FALLIDO', 'LEIDO')),
+  wa_message_id VARCHAR(100)
 );
 
--- Inserción ÚNICAMENTE de roles de configuración (No toca datos legacy)
-INSERT IGNORE INTO app_roles (nombre, descripcion) VALUES 
+-- Inserción de roles base
+INSERT INTO app_roles (nombre, descripcion) VALUES 
 ('SUPER_ADMIN', 'Acceso total al sistema'),
 ('DIRECTOR', 'Reportes financieros y estratégicos'),
 ('JEFE_CREDITO', 'Gestión de rutas y auditoría'),
 ('COBRANZA', 'App de campo para cobros'),
-('VENTAS', 'Registro de nuevos contratos');
-
--- IMPORTANTE: No se incluyen INSERTS para cat_clientes ni pagos legacy
--- para preservar la integridad de los datos reales ya existentes.
+('VENTAS', 'Registro de nuevos contratos')
+ON CONFLICT (nombre) DO NOTHING;
 `;

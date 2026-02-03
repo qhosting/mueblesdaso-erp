@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # Database: PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: mueblesdaso-db
+    environment:
+      POSTGRES_USER: ${PGUSER:-postgres}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-postgres}
+      POSTGRES_DB: ${PGDATABASE:-mueblesdaso_erp}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql # Autocreación de tablas y usuarios
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  # Backend API
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: mueblesdaso-backend
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://${PGUSER:-postgres}:${PGPASSWORD:-postgres}@postgres:5432/${PGDATABASE:-mueblesdaso_erp}
+      JWT_SECRET: ${JWT_SECRET:-mueblesdaso-secret-key-2026}
+      PORT: 3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
+
+  # Frontend ERP/CRM
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mueblesdaso-frontend
+    ports:
+      - "80:80"
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-/api}
+      VITE_WAHA_URL: ${VITE_WAHA_URL}
+      VITE_N8N_WEBHOOK_URL: ${VITE_N8N_WEBHOOK_URL}
+    depends_on:
+      - backend
+    restart: always
+
+  # WhatsApp Gateway (WAHA)
+  waha:
+    image: devlikeapro/waha
+    container_name: mueblesdaso-waha
+    ports:
+      - "3001:3000"
+    environment:
+      - WAHA_PRINT_QR=true
+    restart: always
+
+volumes:
+  postgres_data:

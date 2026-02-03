@@ -1,24 +1,55 @@
 
 import React, { useState, useMemo } from 'react';
-import { 
-  AlertTriangle, TrendingUp, Calendar, Send, UserX, 
+import {
+  AlertTriangle, TrendingUp, Calendar, Send, UserX,
   Table as TableIcon, BarChart4, Download, FileSpreadsheet,
-  BrainCircuit, ChevronRight, Clock
+  BrainCircuit, ChevronRight, Clock, Loader2
 } from 'lucide-react';
+
 import { MOCK_CLIENTS, MOCK_PAYMENTS } from '../constants';
 import { AgingRow } from '../types';
+import { wahaService } from '../src/services/waha.service';
+import { useNotification } from '../src/context/NotificationContext';
+
+
 
 const CollectionIntelligence: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'summary' | 'aging' | 'forecast'>('summary');
-  
+  const [sending, setSending] = useState<string | null>(null);
+  const { addNotification } = useNotification();
+
+  const handleSendReminder = async (client: any) => {
+    setSending(client.codigo);
+    try {
+      const success = await wahaService.sendNotificationToN8n('PAYMENT_REMINDER_REQUEST', {
+        clientId: client.codigo,
+        clientName: client.nombre,
+        amountDue: client.totalVencido,
+        phone: MOCK_CLIENTS.find(c => c.cod_cliente === client.codigo)?.tel1_cliente
+      });
+
+      if (success) {
+        addNotification('Recordatorio enviado a n8n correctamente', 'SUCCESS');
+      } else {
+        addNotification('Error al contactar con n8n', 'ERROR');
+      }
+    } catch (error) {
+      addNotification('Error inesperado al enviar recordatorio', 'ERROR');
+    } finally {
+      setSending(null);
+    }
+  };
+
+
+
   // Fecha de referencia para el cálculo de antigüedad (Simulación)
   const REFERENCE_DATE = new Date('2024-04-01');
 
   const agingData = useMemo(() => {
     return MOCK_CLIENTS.map(client => {
       const clientPayments = MOCK_PAYMENTS.filter(p => p.cod_cliente === client.cod_cliente);
-      const lastPayment = clientPayments.length > 0 
-        ? new Date(clientPayments[0].fechap) 
+      const lastPayment = clientPayments.length > 0
+        ? new Date(clientPayments[0].fechap)
         : new Date(client.fcontrato || '2023-01-01');
 
       const diffTime = Math.abs(REFERENCE_DATE.getTime() - lastPayment.getTime());
@@ -36,7 +67,7 @@ const CollectionIntelligence: React.FC = () => {
 
       // Pronóstico (Por vencer) basado en saldo actual y periodicidad
       const porVencer = client.saldo_actualcli - client.semdv;
-      
+
       return {
         codigo: client.cod_cliente,
         nombre: client.nombre_ccliente,
@@ -70,26 +101,26 @@ const CollectionIntelligence: React.FC = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <BrainCircuit className="text-blue-600" /> 
+            <BrainCircuit className="text-blue-600" />
             Inteligencia de Cartera y Recuperación
           </h1>
           <p className="text-slate-500 text-sm font-medium">Análisis automatizado de antigüedad de saldos con IA</p>
         </div>
-        
+
         <div className="flex bg-slate-200 p-1 rounded-xl shadow-inner">
-          <button 
+          <button
             onClick={() => setActiveTab('summary')}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${activeTab === 'summary' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <BarChart4 className="w-4 h-4" /> Resumen General
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('aging')}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${activeTab === 'aging' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <TableIcon className="w-4 h-4" /> Antigüedad de Saldos
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('forecast')}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${activeTab === 'forecast' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
@@ -102,16 +133,16 @@ const CollectionIntelligence: React.FC = () => {
         <div className="space-y-6 animate-in fade-in duration-500">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-red-50 border border-red-100 p-6 rounded-2xl shadow-sm relative overflow-hidden">
-               <div className="absolute top-0 right-0 p-4 opacity-10"><AlertTriangle size={80} /></div>
-               <p className="text-[10px] font-black text-red-600 uppercase tracking-widest mb-1">Carga Crítica (91+ Días)</p>
-               <h3 className="text-4xl font-black text-red-700">${totals.v91.toLocaleString()}</h3>
-               <p className="text-xs text-red-500 mt-2 font-bold flex items-center gap-1"><Clock className="w-3 h-3" /> Requiere acción jurídica inmediata</p>
+              <div className="absolute top-0 right-0 p-4 opacity-10"><AlertTriangle size={80} /></div>
+              <p className="text-[10px] font-black text-red-600 uppercase tracking-widest mb-1">Carga Crítica (91+ Días)</p>
+              <h3 className="text-4xl font-black text-red-700">${totals.v91.toLocaleString()}</h3>
+              <p className="text-xs text-red-500 mt-2 font-bold flex items-center gap-1"><Clock className="w-3 h-3" /> Requiere acción jurídica inmediata</p>
             </div>
-            
+
             <div className="bg-blue-50 border border-blue-100 p-6 rounded-2xl shadow-sm">
-               <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Recuperación 0-30 Días</p>
-               <h3 className="text-4xl font-black text-blue-700">${totals.v0.toLocaleString()}</h3>
-               <p className="text-xs text-blue-500 mt-2 font-bold">Cobranza administrativa estándar</p>
+              <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Recuperación 0-30 Días</p>
+              <h3 className="text-4xl font-black text-blue-700">${totals.v0.toLocaleString()}</h3>
+              <p className="text-xs text-blue-500 mt-2 font-bold">Cobranza administrativa estándar</p>
             </div>
 
             <div className="bg-slate-900 p-6 rounded-2xl text-white shadow-xl flex flex-col justify-between">
@@ -173,6 +204,7 @@ const CollectionIntelligence: React.FC = () => {
                     {activeTab === 'aging' ? 'Saldos Vencidos (Aging)' : 'Saldos por Vencer (Forecast)'}
                   </th>
                   <th className="px-4 py-3 bg-slate-800 text-slate-300">Total General</th>
+                  <th className="px-4 py-3 bg-slate-700 text-slate-300 w-24">Acciones</th>
                 </tr>
                 <tr className="bg-slate-100 text-slate-500 text-[9px] font-black uppercase text-center border-b border-slate-200">
                   <th className="px-4 py-2 border-r border-slate-200 text-left w-24">Código</th>
@@ -182,8 +214,10 @@ const CollectionIntelligence: React.FC = () => {
                   <th className="px-4 py-2 border-r border-slate-200 w-24">31-60 Días</th>
                   <th className="px-4 py-2 border-r border-slate-200 w-24">61-90 Días</th>
                   <th className="px-4 py-2 border-r border-slate-200 w-24">91+ Días</th>
-                  <th className="px-4 py-2 w-32 bg-slate-50">Saldo</th>
+                  <th className="px-4 py-2 border-r border-slate-200 w-32 bg-slate-50">Saldo</th>
+                  <th className="px-4 py-2 w-24">WhatsApp</th>
                 </tr>
+
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
                 {agingData.map((row, idx) => (
@@ -205,10 +239,21 @@ const CollectionIntelligence: React.FC = () => {
                     <td className={`px-4 py-2 border-r border-slate-100 text-right ${activeTab === 'aging' && row.vencido91_mas > 0 ? 'text-white font-black bg-red-600 shadow-inner' : 'text-slate-400'}`}>
                       {activeTab === 'aging' ? row.vencido91_mas.toLocaleString('en-US', { minimumFractionDigits: 2 }) : row.vencer91_mas.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </td>
-                    <td className="px-4 py-2 text-right font-black bg-slate-800 text-slate-100">
+                    <td className="px-4 py-2 text-right font-black bg-slate-800 text-slate-100 border-r border-slate-700">
                       {row.totalGeneral.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </td>
+                    <td className="px-4 py-2 text-center bg-slate-50">
+                      <button
+                        onClick={() => handleSendReminder(row)}
+                        disabled={sending === row.codigo || row.totalVencidox === 0}
+                        className={`p-2 rounded-lg transition-all ${sending === row.codigo ? 'bg-slate-200' : 'bg-green-100 text-green-600 hover:bg-green-600 hover:text-white shadow-sm'}`}
+                        title="Enviar recordatorio de pago"
+                      >
+                        {sending === row.codigo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                      </button>
+                    </td>
                   </tr>
+
                 ))}
               </tbody>
               <tfoot className="sticky bottom-0 bg-slate-900 text-white font-black text-[11px]">

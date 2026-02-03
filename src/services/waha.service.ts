@@ -1,15 +1,25 @@
-import api from './api';
+import axios from 'axios';
 import { ENV } from '../config/env';
 
+// Cliente axios específico para WAHA si es externo
+const wahaApi = axios.create({
+  baseURL: ENV.WAHA_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    ...(ENV.WAHA_API_KEY ? { 'X-Api-Key': ENV.WAHA_API_KEY } : {}),
+  },
+});
+
 export const wahaService = {
+  /**
+   * Envía un mensaje directamente vía API de WAHA
+   */
   sendMessage: async (chatId: string, text: string): Promise<{ success: boolean; messageId?: string }> => {
     try {
-      // Formato de chatId para Waha suele ser '5214421234567@c.us'
-      // Limpiamos el número por si viene sucio
       const cleanPhone = chatId.replace(/\D/g, '');
       const formattedChatId = `${cleanPhone}@c.us`;
 
-      const response = await api.post<{ id: string; timestamp: number }>('/waha/api/sendText', {
+      const response = await wahaApi.post('/api/sendText', {
         chatId: formattedChatId,
         text: text,
         session: 'default'
@@ -17,7 +27,7 @@ export const wahaService = {
 
       return { success: true, messageId: response.data.id };
     } catch (error) {
-      console.error('Error sending WhatsApp:', error);
+      console.error('Error sending WhatsApp via WAHA:', error);
 
       if (ENV.IS_DEV) {
         console.warn(`⚠️ [MOCK WAHA] Enviando a ${chatId}: "${text}"`);
@@ -29,9 +39,46 @@ export const wahaService = {
     }
   },
 
-  sendMedia: async (chatId: string, caption: string, mediaUrl: string): Promise<{ success: boolean }> => {
-      // Implementación futura para enviar recibos como imagen
-      console.log('Sending media not implemented yet');
+  /**
+   * Envía una notificación a n8n para que este procese el envío
+   */
+  sendNotificationToN8n: async (event: string, payload: any): Promise<{ success: boolean }> => {
+    if (!ENV.N8N_WEBHOOK_URL) {
+      console.warn('⚠️ N8N_WEBHOOK_URL no configurado');
       return { success: false };
+    }
+
+    try {
+      await axios.post(ENV.N8N_WEBHOOK_URL, {
+        event,
+        data: payload,
+        timestamp: new Date().toISOString()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error sending to n8n:', error);
+      return { success: false };
+    }
+  },
+
+  sendMedia: async (chatId: string, caption: string, mediaUrl: string): Promise<{ success: boolean }> => {
+    try {
+      const cleanPhone = chatId.replace(/\D/g, '');
+      const formattedChatId = `${cleanPhone}@c.us`;
+
+      await wahaApi.post('/api/sendImage', {
+        chatId: formattedChatId,
+        file: {
+          url: mediaUrl
+        },
+        caption: caption,
+        session: 'default'
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error sending media via WAHA:', error);
+      return { success: false };
+    }
   }
 };
