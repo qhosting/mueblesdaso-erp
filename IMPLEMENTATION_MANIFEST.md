@@ -1,17 +1,16 @@
 # 📌 Guía de Configuración de Variables - Easypanel
 **Dominio de Producción:** `app.mueblesdaso.com`
 
-> **⚠️ ADVERTENCIA DE SEGURIDAD:** Las tablas `cat_clientes` y `pagos` contienen datos reales. Asegúrate de que las credenciales de MariaDB sean las correctas antes de levantar los servicios para evitar bloqueos de conexión.
+> **⚠️ ADVERTENCIA DE SEGURIDAD:** Las tablas `cat_clientes` y `pagos` contienen datos reales. Asegúrate de que las credenciales de PostgreSQL sean las correctas antes de levantar los servicios para evitar bloqueos de conexión.
 
-## 1. Servicio: `mariadb` (Base de Datos)
-*Crea este servicio usando el template de MariaDB en Easypanel.*
+## 1. Servicio: `postgres` (Base de Datos)
+*Crea este servicio usando el template de PostgreSQL en Easypanel.*
 
 | Variable | Valor Sugerido / Actual | Descripción |
 | :--- | :--- | :--- |
-| `MYSQL_ROOT_PASSWORD` | `mueblesdaso_root_2024` | Contraseña maestra del servidor. |
-| `MYSQL_DATABASE` | `mueblesdaso_cob` | Debe coincidir con tu DB actual. |
-| `MYSQL_USER` | `mueblesdaso_cob` | Usuario con permisos en `cat_clientes`. |
-| `MYSQL_PASSWORD` | `B4Dl6VlHDo` | Contraseña del usuario anterior. |
+| `POSTGRES_USER` | `postgres` | Usuario maestro del servidor. |
+| `POSTGRES_DB` | `mueblesdaso_erp` | Nombre de la base de datos principal. |
+| `POSTGRES_PASSWORD` | `postgres` | Contraseña del usuario maestro. |
 
 ---
 
@@ -20,10 +19,10 @@
 
 | Variable | Valor |
 | :--- | :--- |
-| `DB_HOST` | `mariadb` |
-| `DB_NAME` | `mueblesdaso_cob` |
-| `DB_USER` | `mueblesdaso_cob` |
-| `DB_PASS` | `B4Dl6VlHDo` |
+| `DB_HOST` | `postgres` |
+| `DB_NAME` | `mueblesdaso_erp` |
+| `DB_USER` | `postgres` |
+| `DB_PASS` | `postgres` |
 | `WAHA_URL` | `http://waha:3000` |
 | `PORT` | `3000` |
 | `JWT_SECRET` | `CLAVE_SECRETA_PARA_LOGIN_MUEBLESDASO` |
@@ -48,11 +47,11 @@
 | Variable | Valor |
 | :--- | :--- |
 | `N8N_ENCRYPTION_KEY` | `muebles_crypto_key_unique_123` |
-| `DB_TYPE` | `mariadb` |
-| `DB_MARIADB_HOST` | `mariadb` |
-| `DB_MARIADB_DATABASE` | `mueblesdaso_cob` |
-| `DB_MARIADB_USER` | `mueblesdaso_cob` |
-| `DB_MARIADB_PASSWORD` | `B4Dl6VlHDo` |
+| `DB_TYPE` | `postgresdb` |
+| `DB_POSTGRESDB_HOST` | `postgres` |
+| `DB_POSTGRESDB_DATABASE` | `mueblesdaso_erp` |
+| `DB_POSTGRESDB_USER` | `postgres` |
+| `DB_POSTGRESDB_PASSWORD` | `postgres` |
 | `N8N_HOST` | `n8n.mueblesdaso.com` |
 
 ---
@@ -69,6 +68,6 @@
 
 ## 💡 Pasos Críticos en Easypanel:
 1. **Redes**: Todos los servicios deben estar en la misma "Network" (por defecto lo están si están en el mismo Proyecto).
-2. **Volúmenes**: En el servicio `mariadb`, verifica que la ruta `/var/lib/mysql` esté persistida en un volumen para no perder datos.
+2. **Volúmenes**: En el servicio `postgres`, verifica que la ruta `/var/lib/postgresql/data` esté persistida en un volumen para no perder datos.
 3. **SSL**: Activa HTTPS en la pestaña de dominios para `frontend-pwa`. La PWA **no se instalará** en celulares si no tienes SSL activo.
 4. **Healthchecks**: Easypanel marcará los servicios como "Healthy" automáticamente si los puertos internos (80, 3000, 3001) responden.

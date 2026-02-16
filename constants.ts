@@ -119,15 +119,14 @@ export const MOCK_PAYMENTS: Payment[] = [
 
 export const DOCKER_COMPOSE_MAESTRO = `version: '3.8'
 services:
-  mueblesdaso-mariadb:
-    image: mariadb:10.6
+  mueblesdaso-postgres:
+    image: postgres:15-alpine
     environment:
-      - MYSQL_ROOT_PASSWORD=secret
-      - MYSQL_DATABASE=mueblesdaso_cob
-      - MYSQL_USER=mueblesdaso_cob
-      - MYSQL_PASSWORD=B4Dl6VlHDo
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=mueblesdaso_erp
     volumes:
-      - db_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
     restart: always
 
   waha:
@@ -137,7 +136,7 @@ services:
     restart: always
 
 volumes:
-  db_data:`;
+  postgres_data:`;
 
 export const SQL_SCHEMA = `-- ESQUEMA MAESTRO MUEBLESDASO ERP (OPTIMIZADO PARA POSTGRESQL)
 -- Versión compatible con Easypanel

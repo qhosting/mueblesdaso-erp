@@ -5,7 +5,7 @@ Este documento presenta un análisis detallado del repositorio actual, que corre
 ## 1. Visión General
 El proyecto es una aplicación web progresiva (PWA) construida con tecnologías modernas de React. Su objetivo principal es gestionar las operaciones de una empresa de muebles, incluyendo ventas, gestión de clientes, inventario y cobranza en campo.
 
-El sistema está diseñado para interactuar con varios servicios backend, incluyendo una base de datos MariaDB, una API de lógica de negocio, un servicio de WhatsApp (Waha) y herramientas de automatización (n8n).
+El sistema está diseñado para interactuar con varios servicios backend, incluyendo una base de datos PostgreSQL, una API de lógica de negocio, un servicio de WhatsApp (Waha) y herramientas de automatización (n8n).
 
 ## 2. Stack Tecnológico
 
@@ -27,7 +27,7 @@ El sistema está diseñado para interactuar con varios servicios backend, incluy
 
 ### Archivos Clave
 - **`App.tsx`**: Componente raíz que maneja la navegación principal a través de un estado `view`. Define la barra lateral y el área de contenido principal.
-- **`IMPLEMENTATION_MANIFEST.md`**: Documento crucial que describe la arquitectura completa del sistema, incluyendo variables de entorno para todos los servicios (MariaDB, Backend, Waha, n8n, Frontend).
+- **`IMPLEMENTATION_MANIFEST.md`**: Documento crucial que describe la arquitectura completa del sistema, incluyendo variables de entorno para todos los servicios (PostgreSQL, Backend, Waha, n8n, Frontend).
 - **`types.ts`**: Define las interfaces TypeScript para los modelos de datos (Usuario, Cliente, Cobrador, Pago, Producto, Inventario, Log de WhatsApp, etc.).
 - **`constants.ts`**: Contiene la configuración de conexión (referencial) y, críticamente, **datos de prueba (MOCK_CLIENTS, MOCK_USERS, etc.)** que actualmente alimentan la aplicación.
 

@@ -7,7 +7,7 @@ Este documento estructura las tareas restantes en fases lógicas para dar contin
 
 - [ ] **Infraestructura Backend**:
     - [ ] Verificar estado "Running" de `backend-api` en Easypanel.
-    - [ ] Confirmar conexión exitosa entre `backend-api` y `mariadb`.
+    - [ ] Confirmar conexión exitosa entre `backend-api` y `postgresql`.
 - [ ] **Configuración de Dominio Único**:
     - [x] Nginx Reverse Proxy implementado (Frontend redirige `/api` al backend).
     - [ ] Validar que `app.mueblesdaso.com/api/health` responda correctamente.
