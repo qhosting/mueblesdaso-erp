@@ -9,8 +9,8 @@
 | Variable | Valor Sugerido / Actual | Descripción |
 | :--- | :--- | :--- |
 | `POSTGRES_USER` | `postgres` | Usuario maestro del servidor. |
-| `POSTGRES_DB` | `mueblesdaso_erp` | Nombre de la base de datos principal. |
-| `POSTGRES_PASSWORD` | `postgres` | Contraseña del usuario maestro. |
+| `POSTGRES_DB` | `mueblesdaso-db` | Nombre de la base de datos principal. |
+| `POSTGRES_PASSWORD` | `c89fe7ed85855bf5092d` | Contraseña del usuario maestro. |
 
 ---
 
@@ -19,40 +19,29 @@
 
 | Variable | Valor |
 | :--- | :--- |
-| `DB_HOST` | `postgres` |
-| `DB_NAME` | `mueblesdaso_erp` |
+| `DB_HOST` | `qhosting_mueblesdaso-db` |
+| `DB_NAME` | `mueblesdaso-db` |
 | `DB_USER` | `postgres` |
-| `DB_PASS` | `postgres` |
+| `DB_PASS` | `c89fe7ed85855bf5092d` |
 | `WAHA_URL` | `http://waha:3000` |
 | `PORT` | `3000` |
 | `JWT_SECRET` | `CLAVE_SECRETA_PARA_LOGIN_MUEBLESDASO` |
 
 ---
 
-## 3. Servicio: `waha` (WhatsApp HTTP API)
-*Usa la imagen `devlikeapro/waha`.*
+## 3. Servicio: `waha` (Externo)
+*El servicio de WhatsApp (WAHA) se encuentra en un servidor externo.*
 
-| Variable | Valor | Descripción |
-| :--- | :--- | :--- |
-| `WHATSAPP_DEFAULT_SESSION` | `default` | Nombre de la sesión para escanear QR. |
-| `WAHA_DASHBOARD_USER` | `admin` | Usuario para ver el panel de WAHA. |
-| `WAHA_DASHBOARD_PASSWORD` | `muebles_waha_2024` | Contraseña para el panel de WAHA. |
-| `WAHA_DEBUG` | `false` | Mantener en false en producción. |
+| Variable (en backend-api) | Valor |
+| :--- | :--- |
+| `WAHA_URL` | `https://tu-servidor-waha.com` (Reemplazar con URL real) |
 
 ---
 
-## 4. Servicio: `n8n` (Automatizaciones)
-*Para orquestar recordatorios automáticos de cobro.*
+## 4. Servicio: `n8n` (Externo)
+*El servicio de automatización n8n se encuentra alojado en un servidor externo.*
 
-| Variable | Valor |
-| :--- | :--- |
-| `N8N_ENCRYPTION_KEY` | `muebles_crypto_key_unique_123` |
-| `DB_TYPE` | `postgresdb` |
-| `DB_POSTGRESDB_HOST` | `postgres` |
-| `DB_POSTGRESDB_DATABASE` | `mueblesdaso_erp` |
-| `DB_POSTGRESDB_USER` | `postgres` |
-| `DB_POSTGRESDB_PASSWORD` | `postgres` |
-| `N8N_HOST` | `n8n.mueblesdaso.com` |
+> No requiere configuración en este despliegue de Easypanel.
 
 ---
 

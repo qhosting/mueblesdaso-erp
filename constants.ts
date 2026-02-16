@@ -2,10 +2,10 @@ import { Client, Payment, Collector, Product, InventoryItem, User, UserRole } fr
 
 export const DB_CONFIG = {
   // Configuración para PostgreSQL (Easypanel ready)
-  host: process.env.PGHOST || 'localhost',
+  host: process.env.PGHOST || 'qhosting_mueblesdaso-db',
   user: process.env.PGUSER || 'postgres',
-  pass: process.env.PGPASSWORD || 'postgres',
-  db_name: process.env.PGDATABASE || 'mueblesdaso_erp',
+  pass: process.env.PGPASSWORD || 'c89fe7ed85855bf5092d',
+  db_name: process.env.PGDATABASE || 'mueblesdaso-db',
   port: parseInt(process.env.PGPORT || '5432')
 };
 
@@ -117,14 +117,14 @@ export const MOCK_PAYMENTS: Payment[] = [
   }
 ];
 
-export const DOCKER_COMPOSE_MAESTRO = `version: '3.8'
-services:
-  mueblesdaso-postgres:
+export const DOCKER_COMPOSE_MAESTRO = `services:
+  qhosting_mueblesdaso-db:
     image: postgres:15-alpine
+    container_name: qhosting_mueblesdaso-db
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=mueblesdaso_erp
+      - POSTGRES_PASSWORD=c89fe7ed85855bf5092d
+      - POSTGRES_DB=mueblesdaso-db
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
