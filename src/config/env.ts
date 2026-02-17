@@ -1,7 +1,7 @@
 export const ENV = {
   // En producción, usamos la ruta relativa '/api' gracias al Reverse Proxy de Nginx.
   // En desarrollo, intentamos leer la variable o usar localhost.
-  API_URL: import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '/api'),
+  API_URL: import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : 'https://api.mueblesdaso.com'),
 
   // Configuración PostgreSQL (Easypanel)
   DB: {

@@ -129,6 +129,14 @@ export const DOCKER_COMPOSE_MAESTRO = `services:
       - postgres_data:/var/lib/postgresql/data
     restart: always
 
+  qhosting_redis:
+    image: redis:alpine
+    container_name: qhosting_redis
+    command: redis-server --requirepass 5faf81de3571e8b7146c
+    ports:
+      - "6379:6379"
+    restart: always
+
   waha:
     image: devlikeapro/waha
     ports:

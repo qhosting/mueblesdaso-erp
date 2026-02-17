@@ -14,7 +14,17 @@
 
 ---
 
-## 2. Servicio: `backend-api` (Lógica de Negocio)
+## 2. Servicio: `qhosting_redis` (Caché)
+*Crea este servicio usando el template de Redis en Easypanel.*
+
+| Variable | Valor | Descripción |
+| :--- | :--- | :--- |
+| `REDIS_PASSWORD` | `5faf81de3571e8b7146c` | Contraseña de acceso. |
+| `PORT` | `6379` | Puerto por defecto. |
+
+---
+
+## 3. Servicio: `backend-api` (Lógica de Negocio)
 *Este servicio conecta el Frontend con la DB y WhatsApp.*
 
 | Variable | Valor |
@@ -23,6 +33,7 @@
 | `DB_NAME` | `mueblesdaso-db` |
 | `DB_USER` | `postgres` |
 | `DB_PASS` | `c89fe7ed85855bf5092d` |
+| `REDIS_URL` | `redis://default:5faf81de3571e8b7146c@qhosting_redis:6379` |
 | `WAHA_URL` | `http://waha:3000` |
 | `PORT` | `3000` |
 | `JWT_SECRET` | `CLAVE_SECRETA_PARA_LOGIN_MUEBLESDASO` |

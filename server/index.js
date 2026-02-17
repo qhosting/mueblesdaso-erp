@@ -4,11 +4,13 @@ const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const morgan = require('morgan');
+const { createClient } = require('redis');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'mueblesdaso-secret-key-2026';
+const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 
 // Middleware
 app.use(cors());
@@ -19,6 +21,23 @@ app.use(morgan('dev'));
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL || `postgresql://${process.env.PGUSER || 'postgres'}:${process.env.PGPASSWORD || 'postgres'}@${process.env.PGHOST || 'localhost'}:${process.env.PGPORT || 5432}/${process.env.PGDATABASE || 'mueblesdaso_erp'}`,
 });
+
+// Redis Client
+const redisClient = createClient({
+    url: REDIS_URL
+});
+
+redisClient.on('error', (err) => console.log('❌ Redis Client Error', err));
+
+// Connect Redis
+(async () => {
+    try {
+        await redisClient.connect();
+        console.log('✅ Redis conectado exitosamente');
+    } catch (e) {
+        console.error('❌ Error conectando a Redis:', e);
+    }
+})();
 
 // Test Connection and Init Tables
 pool.query('SELECT NOW()', (err, res) => {

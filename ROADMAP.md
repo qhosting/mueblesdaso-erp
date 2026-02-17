@@ -31,6 +31,7 @@ Sistema ERP/CRM progresivo (PWA) diseñado para gestión integral de ventas mino
 
 ### Backend & Servicios (Infraestructura Declarada)
 - [ ] **PostgreSQL** v15 - Base de datos relacional (Migrada desde MariaDB)
+- [x] **Redis** - Caché y gestión de sesiones
 - [x] **API Backend** - Node.js/Express (En desarrollo/Estructura base)
 - [x] **Waha** - Integración vía API y Webhooks
 
