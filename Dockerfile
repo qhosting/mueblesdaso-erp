@@ -17,34 +17,22 @@ COPY . .
 # Construir la aplicación para producción
 RUN npm run build
 
-# Etapa 2: Servidor Nginx
-FROM nginx:stable-alpine
+# Etapa 2: Servidor Estático (Node.js serve)
+FROM node:22-alpine
 
-# Metadatos para Easypanel
-LABEL org.opencontainers.image.title="Mueblesdaso ERP"
-LABEL org.opencontainers.image.description="ERP/CRM para venta minorista a crédito con soporte PWA"
-LABEL org.opencontainers.image.version="2.2.1"
-LABEL org.opencontainers.image.vendor="Mueblesdaso"
-
-# Limpieza y preparación del directorio raíz de Nginx
-RUN rm -rf /usr/share/nginx/html/*
+# Instalar 'serve' globalmente para servir archivos estáticos
+RUN npm install -g serve
 
 # Copia de los archivos construidos (dist) desde la etapa de construcción
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/dist /app/dist
 
-# Aplicar configuración de Nginx (Crítica para tipos MIME y SPA)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Establecer directorio de trabajo
+WORKDIR /app
 
-# Ajuste de permisos para máxima seguridad en el servidor
-RUN chown -R nginx:nginx /usr/share/nginx/html && \
-    chmod -R 755 /usr/share/nginx/html
-
-# Monitor de salud para Easypanel
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
-
-# Exposición del puerto 80 para tráfico HTTP
+# Exposición del puerto 80
 EXPOSE 80
 
-# Ejecutar Nginx en primer plano
-CMD ["nginx", "-g", "daemon off;"]
+# Ejecutar el servidor estático
+# -s: Single Page Application (redirige 404 a index.html)
+# -l 80: Escuchar en puerto 80
+CMD ["serve", "-s", "dist", "-l", "80"]

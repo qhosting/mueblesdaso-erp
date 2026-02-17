@@ -26,8 +26,8 @@ Sistema ERP/CRM progresivo (PWA) diseñado para gestión integral de ventas mino
 
 ### Infraestructura
 - [x] **Docker** - Contenerización multi-stage
-- [x] **Nginx** - Servidor web estático (Alpine)
-- [x] **Node.js** v22-alpine - Runtime de construcción
+- [x] **Docker** - Contenerización multi-stage
+- [x] **Node.js** v22-alpine - Runtime de construcción y ejecución (serve)
 
 ### Backend & Servicios (Infraestructura Declarada)
 - [ ] **PostgreSQL** v15 - Base de datos relacional (Migrada desde MariaDB)

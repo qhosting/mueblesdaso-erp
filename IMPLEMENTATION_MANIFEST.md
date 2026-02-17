@@ -46,7 +46,7 @@
 ---
 
 ## 5. Servicio: `frontend-pwa` (Interfaz Web)
-*Servido por Nginx (usando el Dockerfile.txt).*
+*Servido por Node.js `serve` (Optimizado para SPA).*
 
 | Variable | Valor |
 | :--- | :--- |
